@@ -18,9 +18,11 @@
                     Margin="15,8">
             <Button Name="PreviousButton"
                     Content="Prethodni"
+                    IsEnabled="{x:Bind ViewModel.IsNotFirst, Mode=OneWay}"
                     Click="{x:Bind ViewModel.Previous}"/>
             <TextBox Name="PositionTextBox"
                      Width="10"
+                     IsEnabled="{x:Bind ViewModel.NotInEditMode}"
                      Text="{x:Bind ViewModel.CurrentPosition, Mode=TwoWay}"
                      InputScope="Number"/>
             <TextBlock Text="/"
@@ -30,6 +32,7 @@
                        Text="{x:Bind ViewModel.ItemsCount, Mode=OneWay}"/>
             <Button Name="NextButton"
                     Content="Slijedeći"
+                    IsEnabled="{x:Bind ViewModel.IsNotLast, Mode=OneWay}"
                     Click="{x:Bind ViewModel.Next}"/>
         </StackPanel>
         <CommandBar Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -40,12 +43,12 @@
             <AppBarButton Name="SaveButton"
                           Label="Spremi"
                           Icon="Save"
-                          IsEnabled="{x:Bind ViewModel.InEditMode}"
+                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
                           Click="{x:Bind ViewModel.Save}"/>
             <AppBarButton Name="CancelButton"
                           Label="Odustani"
                           Icon="Cancel"
-                          IsEnabled="{x:Bind ViewModel.InEditMode}"
+                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
                           Click="{x:Bind ViewModel.Cancel}"/>
             <AppBarSeparator/>
             <AppBarButton Name="EditButton"
@@ -55,7 +58,7 @@
             <AppBarButton Name="DeleteButton"
                           Label="Izbriši"
                           Icon="Delete"
-                          IsEnabled="{x:Bind ViewModel.NotInEditMode}"
+                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
                           Click="{x:Bind ViewModel.Delete}"/>
             <AppBarButton Name="NewButton"
                           Label="Novi zapis"
@@ -95,7 +98,7 @@
                        Grid.Column="0"/>
             <TextBox Name="NazArtiklaTextBox"
                      Width="200"
-                     IsEnabled="{x:Bind ViewModel.InEditMode}"
+                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
                      Text="{x:Bind ViewModel.CurrentArtikl.NazArtikla, Mode=TwoWay}"
                      Grid.Row="1"
                      Grid.Column="1"/>
@@ -104,7 +107,7 @@
                        Grid.Row="2"
                        Grid.Column="0"/>
             <TextBox Name="JedMjereTextBox"
-                     IsEnabled="{x:Bind ViewModel.InEditMode}"
+                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
                      Text="{x:Bind ViewModel.CurrentArtikl.JedMjere, Mode=TwoWay}"
                      Grid.Row="2"
                      Grid.Column="1"/>
@@ -113,7 +116,8 @@
                        Grid.Row="3"
                        Grid.Column="0"/>
             <TextBox Name="CijArtiklaTextBox"
-                     IsEnabled="{x:Bind ViewModel.InEditMode}"
+                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                     
                      Text="{x:Bind ViewModel.CurrentArtikl.CijArtkila, Mode=TwoWay}"
                      Grid.Row="3"
                      Grid.Column="1"/>
@@ -123,7 +127,7 @@
                        Grid.Column="0"/>
             <CheckBox Name="ZastUslugaCheckBox"
                       IsChecked="{x:Bind ViewModel.CurrentArtikl.ZastUsluga}"
-                      IsEnabled="{x:Bind ViewModel.InEditMode}"
+                      IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
                       Grid.Row="4"
                       Grid.Column="1"/>
             <TextBlock Text="Slika artikla"
@@ -141,7 +145,7 @@
                        Grid.Column="0"/>
             <TextBox Name="TekstArtiklaTextBox"
                      Text="{x:Bind ViewModel.CurrentArtikl.TekstArtikla}"
-                     IsEnabled="{x:Bind ViewModel.InEditMode}"
+                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
                      TextWrapping="Wrap"
                      AcceptsReturn="True"
                      Width="200"

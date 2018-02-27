@@ -12,6 +12,10 @@ namespace Firma.DAL.DTO
     {
         public Artikl()
         {
+            nazArtikla = string.Empty;
+            jedMjere = string.Empty;
+            cijArtikla = 0.0M;
+            tekstArtikla = string.Empty;
         }
 
         #region NotifyPropertyChanged Implementation
@@ -104,10 +108,10 @@ namespace Firma.DAL.DTO
             get { return slikaArtikla; }
             set
             {
-                if (!slikaArtikla.Equals(value))
-                {
+                //if (!slikaArtikla.Equals(value))
+                //{
 
-                }
+                //}
             }
         }
         public byte[] SlikaArtiklaImage { get; set; }

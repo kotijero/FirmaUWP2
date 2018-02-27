@@ -7,7 +7,20 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    </Grid>
+    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <TextBlock Name="TitleTextBlock"
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   Text="Firma UWP 2"
+                   Margin="20"/>
+        <StackPanel Orientation="Horizontal"
+                    RelativePanel.Below="TitleTextBlock"
+                    Margin="10">
+            <Button Name="ArtiklButton"
+                    Content="Artikli"
+                    Click="ArtiklButton_Click"
+                    Width="100"
+                    Height="50"
+                    Margin="10"/>
+        </StackPanel>
+    </RelativePanel>
 </Page>

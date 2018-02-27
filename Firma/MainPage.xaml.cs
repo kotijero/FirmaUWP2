@@ -26,5 +26,10 @@ namespace Firma
         {
             this.InitializeComponent();
         }
+
+        private void ArtiklButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Views.ArtiklDetails));
+        }
     }
 }
