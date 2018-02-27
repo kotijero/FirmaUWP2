@@ -1,0 +1,153 @@
+﻿<Page
+    x:Class="Firma.Views.ArtiklDetails"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Firma.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <TextBlock x:Name="NaslovTextBlock"
+                   Text="Pregled artikala"
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   Margin="25,5,0,24"/>
+        <StackPanel Name="NavigationStackPanel"
+                    Orientation="Horizontal"
+                    RelativePanel.RightOf="NaslovTextBlock"
+                    Margin="15,8">
+            <Button Name="PreviousButton"
+                    Content="Prethodni"
+                    Click="{x:Bind ViewModel.Previous}"/>
+            <TextBox Name="PositionTextBox"
+                     Width="10"
+                     Text="{x:Bind ViewModel.CurrentPosition, Mode=TwoWay}"
+                     InputScope="Number"/>
+            <TextBlock Text="/"
+                       Margin="3,5"/>
+            <TextBlock Name="TotalCountTextBlock"
+                       Margin="0,5,4,0"
+                       Text="{x:Bind ViewModel.ItemsCount, Mode=OneWay}"/>
+            <Button Name="NextButton"
+                    Content="Slijedeći"
+                    Click="{x:Bind ViewModel.Next}"/>
+        </StackPanel>
+        <CommandBar Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignTopWithPanel="True"
+                    OverflowButtonVisibility="Auto"
+                    DefaultLabelPosition="Right">
+            <AppBarButton Name="SaveButton"
+                          Label="Spremi"
+                          Icon="Save"
+                          IsEnabled="{x:Bind ViewModel.InEditMode}"
+                          Click="{x:Bind ViewModel.Save}"/>
+            <AppBarButton Name="CancelButton"
+                          Label="Odustani"
+                          Icon="Cancel"
+                          IsEnabled="{x:Bind ViewModel.InEditMode}"
+                          Click="{x:Bind ViewModel.Cancel}"/>
+            <AppBarSeparator/>
+            <AppBarButton Name="EditButton"
+                          Label="Izmjeni"
+                          Icon="Edit"
+                          Click="{x:Bind ViewModel.Edit}"/>
+            <AppBarButton Name="DeleteButton"
+                          Label="Izbriši"
+                          Icon="Delete"
+                          IsEnabled="{x:Bind ViewModel.NotInEditMode}"
+                          Click="{x:Bind ViewModel.Delete}"/>
+            <AppBarButton Name="NewButton"
+                          Label="Novi zapis"
+                          Icon="Add"
+                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
+                          Click="{x:Bind ViewModel.New}"/>
+        </CommandBar>
+        <Grid RelativePanel.Below="NaslovTextBlock"
+              RelativePanel.AlignLeftWithPanel="True">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Šifra artikla"
+                       Style="{StaticResource BaseTextBlockStyle}"
+                       Margin="10"
+                       Grid.Row="0"
+                       Grid.Column="0"/>
+            <TextBox Name="SifArtiklaTextBox"
+                     Text="{x:Bind ViewModel.CurrentArtikl.SifArtikla, Mode=TwoWay}"
+                     Width="200"
+                     IsEnabled="False"
+                     Grid.Row="0"
+                     Grid.Column="1"/>
+            <TextBlock Text="Naziv artikla"
+                       Margin="10"
+                       Grid.Row="1"
+                       Grid.Column="0"/>
+            <TextBox Name="NazArtiklaTextBox"
+                     Width="200"
+                     IsEnabled="{x:Bind ViewModel.InEditMode}"
+                     Text="{x:Bind ViewModel.CurrentArtikl.NazArtikla, Mode=TwoWay}"
+                     Grid.Row="1"
+                     Grid.Column="1"/>
+            <TextBlock Text="Jedinica mjere"
+                       Margin="10"
+                       Grid.Row="2"
+                       Grid.Column="0"/>
+            <TextBox Name="JedMjereTextBox"
+                     IsEnabled="{x:Bind ViewModel.InEditMode}"
+                     Text="{x:Bind ViewModel.CurrentArtikl.JedMjere, Mode=TwoWay}"
+                     Grid.Row="2"
+                     Grid.Column="1"/>
+            <TextBlock Text="Cijena artikla"
+                       Margin="10"
+                       Grid.Row="3"
+                       Grid.Column="0"/>
+            <TextBox Name="CijArtiklaTextBox"
+                     IsEnabled="{x:Bind ViewModel.InEditMode}"
+                     Text="{x:Bind ViewModel.CurrentArtikl.CijArtkila, Mode=TwoWay}"
+                     Grid.Row="3"
+                     Grid.Column="1"/>
+            <TextBlock Text="Usluga"
+                       Margin="10"
+                       Grid.Row="4"
+                       Grid.Column="0"/>
+            <CheckBox Name="ZastUslugaCheckBox"
+                      IsChecked="{x:Bind ViewModel.CurrentArtikl.ZastUsluga}"
+                      IsEnabled="{x:Bind ViewModel.InEditMode}"
+                      Grid.Row="4"
+                      Grid.Column="1"/>
+            <TextBlock Text="Slika artikla"
+                       Margin="10"
+                       Grid.Row="5"
+                       Grid.Column="0"/>
+            <Image x:Name="SlikaArtiklaImage"
+                   Grid.Row="5"
+                   Grid.Column="1"
+                   Height="300"
+                   Width="200"/>
+            <TextBlock Text="Tekst artikla"
+                       Margin="10"
+                       Grid.Row="6"
+                       Grid.Column="0"/>
+            <TextBox Name="TekstArtiklaTextBox"
+                     Text="{x:Bind ViewModel.CurrentArtikl.TekstArtikla}"
+                     IsEnabled="{x:Bind ViewModel.InEditMode}"
+                     TextWrapping="Wrap"
+                     AcceptsReturn="True"
+                     Width="200"
+                     Height="90"
+                     Grid.Row="6"
+                     Grid.Column="1"/>
+        </Grid>
+    </RelativePanel>
+</Page>
