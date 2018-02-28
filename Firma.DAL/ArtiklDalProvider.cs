@@ -72,17 +72,19 @@ namespace Firma.DAL
             return (int)result.Rows[0].ItemArray[0];
         }
 
-        public void AddItem(Artikl item)
+        public int AddItem(Artikl item)
         {
             // TODO: SLIKA!
             string query = String.Format(@"INSERT INTO Artikl (NazArtikla, JedMjere, CijArtikla, ZastUsluga, TekstArtikla)
+                                            OUTPUT Inserted.SifArtikla
                                             VALUES ('{0}', '{1}', {2}, {3}, '{4}')",
                                             item.NazArtikla,
                                             item.JedMjere,
                                             item.CijArtkila,
                                             item.ZastUsluga ? 1 : 0,
                                             item.TekstArtikla);
-            QueryExecutor.ExecuteNonQuery(query);
+            var result = QueryExecutor.ExecuteQuery(query);
+            return (int)result.Rows[0].ItemArray[0];
         }
 
         public void UpdateItem(Artikl item)

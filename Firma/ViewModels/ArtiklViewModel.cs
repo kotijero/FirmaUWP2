@@ -18,6 +18,7 @@ namespace Firma.ViewModels
             inEditMode = false;
             artiklList = artiklDalProvider.FetchAll();
         }
+
         #region NotifyPropertyChanged Implementation
 
         public event PropertyChangedEventHandler PropertyChanged;
