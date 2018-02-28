@@ -5,7 +5,11 @@
     xmlns:local="using:Firma.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helper="using:Firma.Helpers"
     mc:Ignorable="d">
+    <Page.Resources>
+        <helper:DecimalToStringConverter x:Key="DecimalToStringConverter"/>
+    </Page.Resources>
 
     <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <TextBlock x:Name="NaslovTextBlock"
@@ -22,7 +26,7 @@
                     Click="{x:Bind ViewModel.Previous}"/>
             <TextBox Name="PositionTextBox"
                      Width="10"
-                     IsEnabled="{x:Bind ViewModel.NotInEditMode}"
+                     IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
                      Text="{x:Bind ViewModel.CurrentPosition, Mode=TwoWay}"
                      InputScope="Number"/>
             <TextBlock Text="/"
@@ -54,6 +58,7 @@
             <AppBarButton Name="EditButton"
                           Label="Izmjeni"
                           Icon="Edit"
+                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
                           Click="{x:Bind ViewModel.Edit}"/>
             <AppBarButton Name="DeleteButton"
                           Label="Izbriši"
@@ -117,8 +122,8 @@
                        Grid.Column="0"/>
             <TextBox Name="CijArtiklaTextBox"
                      IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                     
-                     Text="{x:Bind ViewModel.CurrentArtikl.CijArtkila, Mode=TwoWay}"
+                     InputScope="Number"
+                     Text="{x:Bind ViewModel.CurrentArtikl.CijArtkila, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
                      Grid.Row="3"
                      Grid.Column="1"/>
             <TextBlock Text="Usluga"
@@ -144,7 +149,7 @@
                        Grid.Row="6"
                        Grid.Column="0"/>
             <TextBox Name="TekstArtiklaTextBox"
-                     Text="{x:Bind ViewModel.CurrentArtikl.TekstArtikla}"
+                     Text="{x:Bind ViewModel.CurrentArtikl.TekstArtikla, Mode=TwoWay}"
                      IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
                      TextWrapping="Wrap"
                      AcceptsReturn="True"

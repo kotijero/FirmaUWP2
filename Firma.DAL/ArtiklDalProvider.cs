@@ -76,7 +76,7 @@ namespace Firma.DAL
         {
             // TODO: SLIKA!
             string query = String.Format(@"INSERT INTO Artikl (NazArtikla, JedMjere, CijArtikla, ZastUsluga, TekstArtikla)
-                                            VALUES ({0}, {1}, {2}, {3}, {4})",
+                                            VALUES ('{0}', '{1}', {2}, {3}, '{4}')",
                                             item.NazArtikla,
                                             item.JedMjere,
                                             item.CijArtkila,

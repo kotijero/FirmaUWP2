@@ -166,6 +166,7 @@ namespace Firma.ViewModels
                 {
                     artiklDalProvider.UpdateItem(CurrentArtikl);
                 }
+                InEditMode = false;
             }
             else if (result == ContentDialogResult.Secondary)
             {
