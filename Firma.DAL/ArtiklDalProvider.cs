@@ -1,4 +1,4 @@
-﻿using Firma.DAL.DTO;
+﻿using Firma.Model;
 using System;
 using System.Collections.Generic;
 using System.Data;

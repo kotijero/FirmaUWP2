@@ -1,5 +1,5 @@
 ﻿using Firma.DAL;
-using Firma.DAL.DTO;
+using Firma.Model;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
 
-namespace Firma.ViewModels
+namespace Firma.ViewModel
 {
     public class ArtiklViewModel : INotifyPropertyChanged
     {
@@ -112,7 +112,7 @@ namespace Firma.ViewModels
         {
             if (!inEditMode && currentPosition > 0)
                 CurrentPosition--;
-            
+
         }
 
         public void Next()
@@ -226,6 +226,6 @@ namespace Firma.ViewModels
 
         #endregion
 
-        
+
     }
 }

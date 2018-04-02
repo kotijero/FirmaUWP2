@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{60BABF10-8F4F-4C64-AFBB-4435E2A495BC}</ProjectGuid>
+    <ProjectGuid>{BF7740EC-502D-4E7C-8C99-973AF4BF63AA}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Firma.DAL</RootNamespace>
-    <AssemblyName>Firma.DAL</AssemblyName>
+    <RootNamespace>Firma.Model</RootNamespace>
+    <AssemblyName>Firma.Model</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition=" '$(TargetPlatformVersion)' == '' ">10.0.16299.0</TargetPlatformVersion>
@@ -106,23 +106,22 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ArtiklDalProvider.cs" />
-    <Compile Include="DokumentDalProvider.cs" />
-    <Compile Include="PartnerDalProvider.cs" />
-    <Compile Include="QueryExecutor.cs" />
+    <Compile Include="Artikl.cs" />
+    <Compile Include="Dokument.cs" />
+    <Compile Include="Drzava.cs" />
+    <Compile Include="Korisnik.cs" />
+    <Compile Include="Mjesto.cs" />
+    <Compile Include="Osoba.cs" />
+    <Compile Include="Partner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="Properties\Firma.DAL.rd.xml" />
+    <Compile Include="Stavka.cs" />
+    <Compile Include="Tvrtka.cs" />
+    <EmbeddedResource Include="Properties\Firma.Model.rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.0.4</Version>
     </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Firma.Model\Firma.Model.csproj">
-      <Project>{bf7740ec-502d-4e7c-8c99-973af4bf63aa}</Project>
-      <Name>Firma.Model</Name>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

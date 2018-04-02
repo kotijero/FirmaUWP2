@@ -1,0 +1,18 @@
+﻿<Page
+    x:Class="Firma.Views.PartnerDetails"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Firma.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                Orientation="Horizontal">
+        <StackPanel Orientation="Vertical" Height="720" Margin="0,0,-154,0">
+            <AutoSuggestBox PlaceholderText="Pretraga"
+                            QueryIcon="Find" />
+            <ListView Name="PartnerListView"/>
+        </StackPanel>
+    </StackPanel>
+</Page>

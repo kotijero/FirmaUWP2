@@ -4,8 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Firma.DAL.DTO
-{
+namespace Firma.Model
+{ 
     public class Dokument
     {
         public Dokument()

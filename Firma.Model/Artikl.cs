@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Firma.DAL.DTO
+namespace Firma.Model
 {
     public class Artikl : INotifyPropertyChanged
     {
