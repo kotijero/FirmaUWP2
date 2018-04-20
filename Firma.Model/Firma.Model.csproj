@@ -111,17 +111,25 @@
     <Compile Include="Drzava.cs" />
     <Compile Include="Korisnik.cs" />
     <Compile Include="Mjesto.cs" />
-    <Compile Include="Osoba.cs" />
     <Compile Include="Partner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Stavka.cs" />
-    <Compile Include="Tvrtka.cs" />
     <EmbeddedResource Include="Properties\Firma.Model.rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
       <Version>6.0.4</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Firma.DTO\Firma.DTO.csproj">
+      <Project>{4afd7986-1e41-4dc8-a7b8-7f792c76e849}</Project>
+      <Name>Firma.DTO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Firma.Helpers\Firma.Helpers.csproj">
+      <Project>{68829ad2-ac1b-4338-9181-b9233746a74d}</Project>
+      <Name>Firma.Helpers</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

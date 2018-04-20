@@ -108,6 +108,7 @@
   <ItemGroup>
     <Compile Include="ArtiklDalProvider.cs" />
     <Compile Include="DokumentDalProvider.cs" />
+    <Compile Include="MjestoDalProvider.cs" />
     <Compile Include="PartnerDalProvider.cs" />
     <Compile Include="QueryExecutor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -119,9 +120,13 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Firma.Model\Firma.Model.csproj">
-      <Project>{bf7740ec-502d-4e7c-8c99-973af4bf63aa}</Project>
-      <Name>Firma.Model</Name>
+    <ProjectReference Include="..\Firma.DTO\Firma.DTO.csproj">
+      <Project>{4afd7986-1e41-4dc8-a7b8-7f792c76e849}</Project>
+      <Name>Firma.DTO</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Firma.Helpers\Firma.Helpers.csproj">
+      <Project>{68829ad2-ac1b-4338-9181-b9233746a74d}</Project>
+      <Name>Firma.Helpers</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

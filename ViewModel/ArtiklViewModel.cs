@@ -1,4 +1,5 @@
-﻿using Firma.DAL;
+﻿using Firma.Bl;
+using Firma.Helpers;
 using Firma.Model;
 using System;
 using System.Collections.Generic;
@@ -11,28 +12,17 @@ using Windows.UI.Xaml.Controls;
 
 namespace Firma.ViewModel
 {
-    public class ArtiklViewModel : INotifyPropertyChanged
+    public class ArtiklViewModel : NotifyPropertyChanged
     {
         public ArtiklViewModel()
         {
             inEditMode = false;
-            artiklList = artiklDalProvider.FetchAll();
+            artiklList = blArtikl.FetchAll();
         }
-
-        #region NotifyPropertyChanged Implementation
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void OnPropertyChanged([CallerMemberName]string propertyName = null)
-        {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        #endregion
 
         #region Properties
 
-        private ArtiklDalProvider artiklDalProvider = new ArtiklDalProvider();
+        private BlArtikl blArtikl = new BlArtikl();
 
         private List<Artikl> artiklList;
 
@@ -134,7 +124,7 @@ namespace Firma.ViewModel
                 {
                     NazArtikla = CurrentArtikl.NazArtikla,
                     JedMjere = CurrentArtikl.JedMjere,
-                    CijArtkila = CurrentArtikl.CijArtkila,
+                    CijArtikla = CurrentArtikl.CijArtikla,
                     ZastUsluga = CurrentArtikl.ZastUsluga,
                     SlikaArtikla = CurrentArtikl.SlikaArtikla,
                     TekstArtikla = CurrentArtikl.TekstArtikla
@@ -157,7 +147,7 @@ namespace Firma.ViewModel
             {
                 if (isNewItem)
                 {
-                    artiklDalProvider.AddItem(newArtikl);
+                    blArtikl.AddItem(newArtikl);
                     artiklList.Add(newArtikl);
                     CurrentPosition = artiklList.IndexOf(newArtikl) + 1;
                     isNewItem = false;
@@ -165,7 +155,7 @@ namespace Firma.ViewModel
                 }
                 else
                 {
-                    artiklDalProvider.UpdateItem(CurrentArtikl);
+                    blArtikl.UpdateItem(CurrentArtikl);
                 }
                 InEditMode = false;
             }
@@ -177,21 +167,21 @@ namespace Firma.ViewModel
 
         public void Cancel()
         {
+            InEditMode = false;
             if (isNewItem)
             {
                 isNewItem = false;
-                OnPropertyChanged("CurrentArtikl");
             }
             else
             {
                 CurrentArtikl.NazArtikla = originalArtikl.NazArtikla;
                 CurrentArtikl.JedMjere = originalArtikl.JedMjere;
-                CurrentArtikl.CijArtkila = originalArtikl.CijArtkila;
+                CurrentArtikl.CijArtikla = originalArtikl.CijArtikla;
                 CurrentArtikl.ZastUsluga = originalArtikl.ZastUsluga;
                 CurrentArtikl.SlikaArtikla = originalArtikl.SlikaArtikla;
                 CurrentArtikl.TekstArtikla = originalArtikl.TekstArtikla;
             }
-            InEditMode = false;
+            OnPropertyChanged(nameof(CurrentArtikl));
         }
 
         public void New()
@@ -199,7 +189,7 @@ namespace Firma.ViewModel
             newArtikl = new Artikl();
             isNewItem = true;
             InEditMode = true;
-            OnPropertyChanged("CurrentArtikl");
+            OnPropertyChanged(nameof(CurrentArtikl));
         }
 
         public async void Delete()
@@ -215,7 +205,7 @@ namespace Firma.ViewModel
             if (res == ContentDialogResult.Primary)
             {
                 Artikl artiklToDelete = CurrentArtikl;
-                artiklDalProvider.DeleteItem(artiklToDelete);
+                blArtikl.DeleteItem(artiklToDelete);
                 CurrentPosition = 1;
                 artiklList.Remove(artiklToDelete);
                 OnPropertyChanged("ItemsCount");

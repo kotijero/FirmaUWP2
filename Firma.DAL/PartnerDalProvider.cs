@@ -1,4 +1,5 @@
-﻿using Firma.Model;
+﻿using Firma.DTO;
+using Firma.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -21,7 +22,7 @@ namespace Firma.DAL
             else
             {
                 DataRow row = result.Rows[0];
-                if (row["TipPartnera"].Equals("T"))
+                if (row["TipPartnera"].Equals(Constants.TvrtkaTip))
                 {
                     DataRow tvrtkaRow = QueryExecutor.ExecuteQuery("SELECT * FROM Tvrtka WHERE IdTvrtke = " + Id).Rows[0];
                     Tvrtka tvrtka = new Tvrtka
@@ -127,28 +128,10 @@ namespace Firma.DAL
                         IdMjestaIsporuke = (int?)(row["IdMjestaIsporuke"] == DBNull.Value ? null : row["IdMjestaIsporuke"]),
                         AdrIsporuke = (string)(row["AdrIsporuke"] == DBNull.Value ? string.Empty : row["AdrIsporuke"])
                     };
-                    if (tvrtka.IdMjestaIsporuke != null)
-                    {
-                        tvrtka.MjestoIsporuke = new Mjesto
-                        {
-                            IdMjesta = (int)row["IdMjestaIsporuke"],
-                            NazMjesta = (string)row["NazMjestaIsporuke"],
-                            OznDrzave = (string)row["OznDrzaveIsporuke"],
-                            PostBrMjesta = (int)row["PostBrMjestaIsporuke"],
-                            PostNazMjesta = (string)row["PostNazMjestaIsporuke"]
-                        };
-                    }
-                    if (tvrtka.IdMjestaPartnera != null)
-                    {
-                        tvrtka.MjestoSjedista = new Mjesto
-                        {
-                            IdMjesta = (int)row["IdMjestaPartnera"],
-                            NazMjesta = (string)row["NazMjestaSjedista"],
-                            OznDrzave = (string)row["OznDrzaveSjedista"],
-                            PostBrMjesta = (int)row["PostBrMjestaSjedista"],
-                            PostNazMjesta = (string)row["PostNazMjestaSjedista"]
-                        };
-                    }
+                    if (tvrtka.IdMjestaIsporuke == null)
+                        tvrtka.IdMjestaIsporuke = -1;
+                    if (tvrtka.IdMjestaPartnera == null)
+                        tvrtka.IdMjestaPartnera = -1;
                     partnerList.Add(tvrtka);
                 }
                 foreach (DataRow row in osobaResult.Rows)
@@ -166,70 +149,122 @@ namespace Firma.DAL
                         IdMjestaIsporuke = (int?)(row["IdMjestaIsporuke"] == DBNull.Value ? null : row["IdMjestaIsporuke"]),
                         AdrIsporuke = (string)(row["AdrIsporuke"] == DBNull.Value ? string.Empty : row["AdrIsporuke"])
                     };
+                    if (osoba.IdMjestaIsporuke == null) osoba.IdMjestaIsporuke = -1;
+                    if (osoba.IdMjestaPartnera == null) osoba.IdMjestaPartnera = -1;
                     partnerList.Add(osoba);
                 }
                 return partnerList;
             }
         }
 
-        public Dictionary<int, string> FetchLookup()
+        public List<LookupModel> FetchLookup()
         {
             string query = String.Format(@"SELECT IdPartnera, ImeOsobe, PrezimeOsobe, NazivTvrtke, TipPartnera FROM Partner LEFT JOIN Osoba ON Partner.IdPartnera = Osoba.IdOsobe
                                                                                                                LEFT JOIN Tvrtka ON Partner.IdPartnera = Tvrtka.IdTvrtke");
             DataTable result = QueryExecutor.ExecuteQuery(query);
-            Dictionary<int, string> res = new Dictionary<int, string>();
+            List<LookupModel> res = new List<LookupModel>();
             foreach (DataRow row in result.Rows)
             {
-                if (row["TipPartnera"].Equals("T"))
+                if (row["TipPartnera"].Equals(Constants.TvrtkaTip))
                 {
-                    res.Add((int)row["IdPartnera"], (string)row["NazivTvrtke"]);
+                    res.Add(new LookupModel((int)row["IdPartnera"], (string)row["NazivTvrtke"]));
                 }
                 else
                 {
-                    res.Add((int)row["IdPartnera"], (string)row["ImeOsobe"] + " " + (string)row["PrezimeOsobe"]);
+                    res.Add(new LookupModel((int)row["IdPartnera"], (string)row["ImeOsobe"] + " " + (string)row["PrezimeOsobe"]));
                 }
             }
             return res;
         }
 
-        public void AddItem(Partner item)
+        public Partner AddItem(Partner item)
         {
-            string query = String.Format(@"INSERT INTO Partner (IdPartnera, TipPartnera, OIB, IdMjestaPartnera, AdrPartnera, IdMjestaIsporuke, AdrIsporuke)
-                                                VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6})",
-                                                item.IdPartnera,
+            string query = String.Format(@"INSERT INTO Partner (TipPartnera, OIB, IdMjestaPartnera, AdrPartnera, IdMjestaIsporuke, AdrIsporuke)
+                                                OUTPUT Inserted.IdPartnera
+                                                VALUES ('{0}', '{1}', {2}, '{3}', {4}, '{5}')",
                                                 item.TipPartnera,
                                                 item.OIB,
                                                 item.IdMjestaIsporuke,
                                                 item.AdrPartnera,
                                                 item.IdMjestaIsporuke,
                                                 item.AdrIsporuke);
-            QueryExecutor.ExecuteNonQuery(query);
+            DataTable res = QueryExecutor.ExecuteQuery(query);
+            item.IdPartnera = (int)(res.Rows[0])["IdPartnera"];
+            if (item.TipPartnera.Equals(Constants.OsobaTip))
+            {
+                Osoba osoba = (Osoba)item;
+                query = $@"INSERT INTO Osoba (ImeOsobe, PrezimeOsobe)
+                                VALUES ('{osoba.ImeOsobe}', '{osoba.PrezimeOsobe}')";
+                QueryExecutor.ExecuteNonQuery(query);
+            }
+            else
+            {
+                Tvrtka tvrtka = (Tvrtka)item;
+                query = $@"INSERT INTO Tvrtka (NazivTvrtke, MatBrTvrtke)
+                                VALUES ('{tvrtka.NazivTvrtke}', '{tvrtka.MatBrTvrtke}')";
+            }
+            return item;
         }
 
         public void UpdateItem(Partner item)
         {
             string query = String.Format(@"UPDATE Partner 
-                                              SET TipPartnera = {1},
+                                              SET TipPartnera = '{1}',
                                                   OIB = {2},
                                                   IdMjestaPartnera = {3},
-                                                  AdrPartnera = {4},
+                                                  AdrPartnera = '{4}',
                                                   IdMjestaIsporuke = {5}, 
-                                                  AdrIsporuke = {6})
+                                                  AdrIsporuke = '{6}'
                                                 WHERE IdPartnera = {0}",
                                                 item.IdPartnera,
                                                 item.TipPartnera,
                                                 item.OIB,
-                                                item.IdMjestaIsporuke,
+                                                item.IdMjestaPartnera,
                                                 item.AdrPartnera,
                                                 item.IdMjestaIsporuke,
                                                 item.AdrIsporuke);
             QueryExecutor.ExecuteNonQuery(query);
+            if (item.TipPartnera.Equals(Constants.OsobaTip))
+            {
+                query = $@"UPDATE Osoba
+                              SET ImeOsobe = '{((Osoba)item).ImeOsobe}'
+                                  PrezimeOsobe '{((Osoba)item).PrezimeOsobe}
+                            WHERE IdOsobe = {item.IdPartnera}";
+            }
+            else
+            {
+                query = $@"UPDATE Tvrtka
+                              SET MatBrTvrtke = '{((Tvrtka)item).MatBrTvrtke}'
+                                  NazivTvrtke = '{((Tvrtka)item).MatBrTvrtke}'
+                            WHERE IdTvrtke = {item.IdPartnera}";
+            }
+            QueryExecutor.ExecuteNonQuery(query);
         }
 
-        public void DeleteItem(Partner item)
+        public string DeleteItem(Partner item)
         {
-            string query = String.Format(@"DELETE FROM Partner WHERE IdPartnera = {0}", item.IdPartnera);
-            QueryExecutor.ExecuteNonQuery(query);
+            string query = $"SELECT COUNT(*) FROM Dokument WHERE IdPartnera = {item.IdPartnera}";
+            var res = QueryExecutor.ExecuteQuery(query);
+            if ((int)(res.Rows)[0][0] > 0)
+            {
+                return "Nije moguće obrisati partnera jer baza sadrži dokumente vezane za njega.";
+            }
+
+            if (item.TipPartnera.Equals(Constants.OsobaTip))
+            {
+                query = $"DELETE FROM Osoba WHERE IdOsobe = {item.IdPartnera}";
+                if (QueryExecutor.ExecuteNonQuery(query) < 1) return "Nije moguće obrisati.";
+            }
+            else
+            {
+                query = $"DELETE FROM Tvrtka WHERE IdTvrtke = {item.IdPartnera}";
+                if (QueryExecutor.ExecuteNonQuery(query) < 1) return "Nije moguće obrisati.";
+            }
+
+            query = $"DELETE FROM Partner WHERE IdPartnera = {item.IdPartnera}";
+            if (QueryExecutor.ExecuteNonQuery(query) < 1) return "Nije moguće obrisati";
+            
+            return string.Empty;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Firma.Helpers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -8,8 +9,9 @@ using System.Threading.Tasks;
 
 namespace Firma.Model
 {
-    public class Artikl : INotifyPropertyChanged
+    public class Artikl : NotifyPropertyChanged
     {
+        #region Constructors
         public Artikl()
         {
             nazArtikla = string.Empty;
@@ -18,13 +20,15 @@ namespace Firma.Model
             tekstArtikla = string.Empty;
         }
 
-        #region NotifyPropertyChanged Implementation
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void OnPropertyChanged([CallerMemberName]string propertyName = null)
+        public Artikl(DTO.Artikl artikl)
         {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+            sifArtikla = artikl.SifArtikla;
+            nazArtikla = artikl.NazArtikla;
+            jedMjere = artikl.JedMjere;
+            cijArtikla = artikl.CijArtikla;
+            zastUsluga = artikl.ZastUsluga;
+            slikaArtikla = artikl.SlikaArtikla;
+            tekstArtikla = artikl.TekstArtikla;
         }
 
         #endregion
@@ -79,7 +83,7 @@ namespace Firma.Model
                 }
             }
         }
-        public decimal CijArtkila
+        public decimal CijArtikla
         {
             get { return cijArtikla; }
             set
@@ -126,6 +130,24 @@ namespace Firma.Model
                     OnPropertyChanged();
                 }
             }
+        }
+
+        #endregion
+
+        #region DTO
+
+        public DTO.Artikl ToDTO()
+        {
+            return new DTO.Artikl
+            {
+                SifArtikla = sifArtikla,
+                NazArtikla = nazArtikla,
+                JedMjere = jedMjere,
+                CijArtikla = cijArtikla,
+                ZastUsluga = zastUsluga,
+                SlikaArtikla = slikaArtikla,
+                TekstArtikla = tekstArtikla
+            };
         }
 
         #endregion

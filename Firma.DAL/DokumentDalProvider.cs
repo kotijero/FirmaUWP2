@@ -1,4 +1,4 @@
-﻿using Firma.Model;
+﻿using Firma.DTO;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -76,7 +76,7 @@ namespace Firma.DAL
 
         public List<Dokument> FetchAll()
         {
-            string query = "SELECT * FROM Dokumet";
+            string query = "SELECT * FROM Dokument";
             DataTable documentResult = QueryExecutor.ExecuteQuery(query);
             if (documentResult.Rows.Count < 1)
             {
@@ -93,7 +93,7 @@ namespace Firma.DAL
                                , PostoRabat
                                , NazArtikla
                                , JedMjere
-                            FROM Stavka JOIN Artikl ON Stavka.SifArtikla = Artikl.SifArikla";
+                            FROM Stavka JOIN Artikl ON Stavka.SifArtikla = Artikl.SifArtikla";
                 DataTable stavkeResult = QueryExecutor.ExecuteQuery(query);
                 List<Stavka> stavkaList = new List<Stavka>();
                 foreach(DataRow row in stavkeResult.Rows)
@@ -113,6 +113,7 @@ namespace Firma.DAL
                             JedMjere = (string)row[nameof(Artikl.JedMjere)]
                         }
                     };
+                    stavkaList.Add(stavka);
                 }
 
                 // Priprema - Partneri:
@@ -151,7 +152,7 @@ namespace Firma.DAL
             }
         }
 
-        public void AddItem(Dokument item)
+        public Dokument AddItem(Dokument item)
         {
             string query = String.Format(@"INSERT INTO Dokument (VrDokumenta, BrDokumenta, DatDokumenta, IdPartnera, IdPrethDokumenta, PostoPorez, IznosDokumenta)
                                             OUTPUT inserted.IdDokumenta VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6})",
@@ -163,13 +164,17 @@ namespace Firma.DAL
                                             item.PostoPorez,
                                             item.IznosDokumenta);
             int result = (int)QueryExecutor.ExecuteQuery(query).Rows[0].ItemArray[0];
+            item.IdDokumenta = result;
+
             foreach (Stavka stavka in item.Stavke)
             {
+                stavka.IdDokumenta = result;
                 query = String.Format(@"INSERT INTO Stavka (IdDokumenta, SifArtikla, KolArtikla, JedCijArtikla, PostoRabat)
-                                                    VALUES ({0}, {1}, {2}, {3}, {4})",
-                                                    result, stavka.SifArtikla, stavka.KolArtikla, stavka.JedCijArtikla, stavka.PostoRabat);
-                QueryExecutor.ExecuteNonQuery(query);
+                                         OUTPUT inserted.IdStavke VALUES ({0}, {1}, {2}, {3}, {4})",
+                                                    stavka.IdDokumenta, stavka.SifArtikla, stavka.KolArtikla, stavka.JedCijArtikla, stavka.PostoRabat);
+                stavka.IdStavke = (int)QueryExecutor.ExecuteQuery(query).Rows[0][0];
             }
+            return item;
         }
 
         public void UpdateItem(Dokument item)
@@ -234,12 +239,21 @@ namespace Firma.DAL
             }
         }
 
-        public void DeleteItem(Dokument dokument)
+        public string DeleteItem(Dokument dokument)
         {
-            string query = String.Format("DELETE FROM Stavka WHERE IdDokumenta = {0}", dokument.IdDokumenta);
+            string query = $"SELECT COUNT(*) FROM Dokument WHERE IdPrethDokumenta = {dokument.IdDokumenta}";
+            var res = QueryExecutor.ExecuteQuery(query);
+            if ((int)(res.Rows)[0][0] > 0)
+            {
+                return "Nije moguće obrisati dokument jer u bazi postoje dokumenti koji se referenciraju na ovaj dokument!";
+            }
+
+            query = String.Format("DELETE FROM Stavka WHERE IdDokumenta = {0}", dokument.IdDokumenta);
             QueryExecutor.ExecuteNonQuery(query);
             query = String.Format("DELETE FROM Dokument WHERE IdDokumenta = {0}", dokument.IdDokumenta);
             QueryExecutor.ExecuteNonQuery(query);
+
+            return string.Empty;
         }
     }
 }

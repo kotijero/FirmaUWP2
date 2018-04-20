@@ -8,19 +8,60 @@
     mc:Ignorable="d">
 
     <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Button Name="BackButton"
+                Style="{StaticResource NavigationBackButtonNormalStyle}"
+                RelativePanel.AlignTopWithPanel="True"
+                RelativePanel.AlignLeftWithPanel="True"
+                Click="BackButton_Click"
+                IsEnabled="False"/>
         <TextBlock Name="TitleTextBlock"
                    Style="{StaticResource TitleTextBlockStyle}"
                    Text="Firma UWP 2"
-                   Margin="20"/>
+                   Margin="7"
+                   RelativePanel.RightOf="BackButton"/>
         <StackPanel Orientation="Horizontal"
                     RelativePanel.Below="TitleTextBlock"
                     Margin="10">
             <Button Name="ArtiklButton"
-                    Content="Artikli"
                     Click="ArtiklButton_Click"
-                    Width="100"
-                    Height="50"
-                    Margin="10"/>
+                    Width="150"
+                    Height="150"
+                    Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <SymbolIcon Symbol="Shop"
+                                Margin="5"/>
+                    <TextBlock Text="Artikli"
+                               Margin="5"
+                               Style="{StaticResource SubtitleTextBlockStyle}"/>
+                </StackPanel>
+                
+            </Button>
+            <Button Name="PartnerButton"
+                    Click="PartnerButton_Click"
+                    Height="150"
+                    Width="150"
+                    Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <SymbolIcon Symbol="People"
+                                Margin="5"/>
+                    <TextBlock Text="Partneri"
+                               Margin="5"
+                               Style="{StaticResource SubtitleTextBlockStyle}"/>
+                </StackPanel>
+            </Button>
+            <Button Name="DokumentButton"
+                    Click="DokumentButton_Click"
+                    Height="150"
+                    Width="150"
+                    Margin="10">
+                <StackPanel Orientation="Horizontal">
+                    <SymbolIcon Symbol="Document"
+                                Margin="5"/>
+                    <TextBlock Text="Dokumenti"
+                               Margin="5"
+                               Style="{StaticResource SubtitleTextBlockStyle}"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
     </RelativePanel>
 </Page>

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Data;
 
-namespace Firma.Helpers
+namespace Firma.Converters
 {
     public class ChangeTypeConverter : IValueConverter
     {

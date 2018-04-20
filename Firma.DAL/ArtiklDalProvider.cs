@@ -1,4 +1,5 @@
-﻿using Firma.Model;
+﻿using Firma.DTO;
+using Firma.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -26,7 +27,7 @@ namespace Firma.DAL
                     SifArtikla = (int)row["SifArtikla"],
                     NazArtikla = (string)row["NazArtikla"],
                     JedMjere = (string)row["JedMjere"],
-                    CijArtkila = (decimal)row["CijArtikla"],
+                    CijArtikla = (decimal)row["CijArtikla"],
                     ZastUsluga = (bool)row["ZastUsluga"],
                     SlikaArtikla = (byte[])row["SlikaArtikla"],
                     TekstArtikla = (string)row["TekstArtikla"]
@@ -54,7 +55,7 @@ namespace Firma.DAL
                         SifArtikla = row["SifArtikla"].GetType() == typeof(DBNull) ? default(int) : (int)row["SifArtikla"],
                         NazArtikla = row["NazArtikla"].GetType() == typeof(DBNull) ? string.Empty : (string)row["NazArtikla"],
                         JedMjere = row["JedMjere"].GetType() == typeof(DBNull) ? string.Empty : (string)row["JedMjere"],
-                        CijArtkila = row["CijArtikla"].GetType() == typeof(DBNull) ? default(decimal) : (decimal)row["CijArtikla"],
+                        CijArtikla = row["CijArtikla"].GetType() == typeof(DBNull) ? default(decimal) : (decimal)row["CijArtikla"],
                         ZastUsluga = row["ZastUsluga"].GetType() == typeof(DBNull) ? default(bool) : (bool)row["ZastUsluga"],
                         SlikaArtikla = row["SlikaArtikla"].GetType() == typeof(DBNull) ? default(byte[]) : (byte[])row["SlikaArtikla"],
                         TekstArtikla = row["TekstArtikla"].GetType() == typeof(DBNull) ? string.Empty : (string)row["TekstArtikla"]
@@ -72,7 +73,7 @@ namespace Firma.DAL
             return (int)result.Rows[0].ItemArray[0];
         }
 
-        public int AddItem(Artikl item)
+        public Artikl AddItem(Artikl item)
         {
             // TODO: SLIKA!
             string query = String.Format(@"INSERT INTO Artikl (NazArtikla, JedMjere, CijArtikla, ZastUsluga, TekstArtikla)
@@ -80,11 +81,12 @@ namespace Firma.DAL
                                             VALUES ('{0}', '{1}', {2}, {3}, '{4}')",
                                             item.NazArtikla,
                                             item.JedMjere,
-                                            item.CijArtkila,
+                                            item.CijArtikla,
                                             item.ZastUsluga ? 1 : 0,
                                             item.TekstArtikla);
             var result = QueryExecutor.ExecuteQuery(query);
-            return (int)result.Rows[0].ItemArray[0];
+            item.SifArtikla = (int)result.Rows[0].ItemArray[0];
+            return item;
         }
 
         public void UpdateItem(Artikl item)
@@ -98,29 +100,38 @@ namespace Firma.DAL
                                             WHERE SifArtikla = {5}",
                                                      item.NazArtikla,
                                                      item.JedMjere,
-                                                     item.CijArtkila,
+                                                     item.CijArtikla,
                                                      item.ZastUsluga ? 1 : 0,
                                                      item.TekstArtikla,
                                                      item.SifArtikla);
             QueryExecutor.ExecuteNonQuery(query);
         }
 
-        public void DeleteItem(Artikl item)
+        public string DeleteItem(Artikl item)
         {
-            string query = String.Format(@"DELETE FROM Artikl WHERE SifArtikla = {0}", item.SifArtikla);
-            QueryExecutor.ExecuteNonQuery(query);
+            string query = $"SELECT COUNT(*) FROM Stavka WHERE SifArtikla = {item.SifArtikla}";
+            var res = QueryExecutor.ExecuteQuery(query);
+            if ((int)(res.Rows)[0][0] > 0)
+                return "Nije moguće obrisati artikl jer baza sadrži stavke sa ovim artiklom!";
+
+            query = String.Format(@"DELETE FROM Artikl WHERE SifArtikla = {0}", item.SifArtikla);
+            if (QueryExecutor.ExecuteNonQuery(query) < 1)
+                return "Nije moguće obrisati!";
+
+            return string.Empty;
         }
 
-        public Dictionary<int, string> FetchLookup()
+        public List<LookupModel> FetchLookup()
         {
             string query = @"SELECT SifArtikla, NazArtikla FROM Artikl";
             var result = QueryExecutor.ExecuteQuery(query);
-            Dictionary<int, string> dict = new Dictionary<int, string>();
+            List<LookupModel> lookupList = new List<LookupModel>();
             foreach (DataRow row in result.Rows)
             {
-                dict.Add((int)row["SifArtikla"], (string)row["NazArtikla"]);
+                lookupList.Add(new LookupModel((int)row["SifArtikla"], (string)row["NazArtikla"]));
             }
-            return dict;
+
+            return lookupList;
         }
     }
 }

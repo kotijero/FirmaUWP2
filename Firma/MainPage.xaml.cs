@@ -25,6 +25,7 @@ namespace Firma
         public MainPage()
         {
             this.InitializeComponent();
+            this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
         }
 
         private void ArtiklButton_Click(object sender, RoutedEventArgs e)
@@ -44,6 +45,21 @@ namespace Firma
             {
                 Windows.UI.Core.SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.Collapsed;
             }
+        }
+
+        private void PartnerButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Views.PartnerDetails));
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void DokumentButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Views.DokumentDetails));
         }
     }
 }

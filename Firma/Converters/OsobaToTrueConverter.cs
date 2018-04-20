@@ -1,22 +1,30 @@
-﻿using System;
+﻿using Firma.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Data;
 
-namespace Firma.Helpers
+namespace Firma.Converters
 {
-    public class DecimalToStringConverter : IValueConverter
+    public class OsobaToTrueConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            return value.ToString();
+            return value.ToString().Equals(Constants.OsobaTip);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            return decimal.Parse(value as string);
+            if ((bool)value)
+            {
+                return Constants.OsobaTip;
+            }
+            else
+            {
+                return Constants.TvrtkaTip;
+            }
         }
     }
 }

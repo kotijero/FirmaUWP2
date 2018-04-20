@@ -4,20 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Firma.Model
+namespace Firma.DTO
 {
     public class Osoba : Partner
     {
         public string PrezimeOsobe { get; set; }
         public string ImeOsobe { get; set; }
-
-
-        public override string Naziv
-        {
-            get
-            {
-                return ImeOsobe + " " + PrezimeOsobe;
-            }
-        }
     }
 }

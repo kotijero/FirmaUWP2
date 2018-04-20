@@ -5,14 +5,285 @@
     xmlns:local="using:Firma.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:Firma.Converters"
     mc:Ignorable="d">
+    <Page.Resources>
+        <converters:OsobaToTrueConverter x:Key="OsobaToTrueConverter"/>
+        <converters:TvrtkaToTrueConverter x:Key="TvrtkaToTrueConverter"/>
+        <converters:OsobaToVisibleConverter x:Key="OsobaToVisibleConverter"/>
+        <converters:TvrtkaToVisibleConverter x:Key="TvrtkaToVisibleConverter"/>
+        <converters:TrueToVisibleConverter x:Key="TrueToVisibleConverter"/>
+        <converters:FalseToVisibleConverter x:Key="FalseToVisibleConverter"/>
+    </Page.Resources>
 
-    <StackPanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                Orientation="Horizontal">
-        <StackPanel Orientation="Vertical" Height="720" Margin="0,0,-154,0">
-            <AutoSuggestBox PlaceholderText="Pretraga"
-                            QueryIcon="Find" />
-            <ListView Name="PartnerListView"/>
+    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Button Name="BackButton"
+                Style="{StaticResource NavigationBackButtonNormalStyle}"
+                RelativePanel.AlignTopWithPanel="True"
+                RelativePanel.AlignLeftWithPanel="True"
+                Click="BackButton_Click"
+                IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"/>
+        <TextBlock Name="TitleTextBlock"
+                   Text="Partneri"
+                   Margin="7"
+                   RelativePanel.RightOf="BackButton"
+                   Style="{StaticResource TitleTextBlockStyle}"/>
+        <CommandBar Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                    RelativePanel.AlignRightWithPanel="True"
+                    RelativePanel.AlignTopWithPanel="True"
+                    DefaultLabelPosition="Right">
+            <AppBarButton Name="SaveButton"
+                          Label="Spremi"
+                          Icon="Save"
+                          Click="{x:Bind ViewModel.Save}"
+                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                          Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
+            <AppBarButton Name="CancelButton"
+                          Label="Odustani"
+                          Icon="Cancel"
+                          Click="{x:Bind ViewModel.Cancel}"
+                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                          Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
+            <AppBarButton Name="EditButton"
+                          Label="Izmjeni"
+                          Icon="Edit"
+                          Click="{x:Bind ViewModel.Edit}"
+                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
+                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
+            <AppBarButton Name="DeleteButton"
+                          Label="Izbriši"
+                          Icon="Delete"
+                          Click="{x:Bind ViewModel.Delete}"
+                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
+                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
+            <AppBarButton Name="NewButton"
+                          Label="Dodaj novi"
+                          Icon="Add"
+                          Click="{x:Bind ViewModel.New}"
+                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
+                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
+        </CommandBar>
+        <RelativePanel Name="PartnerListRelativePanel" Margin="0,0,0,0"
+                       RelativePanel.AlignBottomWithPanel="True"
+                       RelativePanel.AlignLeftWithPanel="True"
+                       RelativePanel.Below="TitleTextBlock">
+            <AutoSuggestBox Name="SearchASBox"
+                            PlaceholderText="Pretraga"
+                            QueryIcon="Find" 
+                            Margin="10"
+                            MinWidth="200"
+                            TextChanged="AutoSuggestBox_TextChanged"
+                            IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"/>
+            <ProgressRing x:Name="LoadingIndicator"
+                          Margin="24,0,0,24"
+                          RelativePanel.Below="SearchASBox"
+                          IsActive="{x:Bind ViewModel.Loading, Mode=OneWay}"/>
+            <ListView Name="PartnerListView"
+                      RelativePanel.Below="SearchASBox"
+                      RelativePanel.AlignBottomWithPanel="True"
+                      Margin="10"
+                      Grid.Row="1"
+                      ItemsSource="{x:Bind ViewModel.FilteredPartnerList}"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto"
+                      SelectedIndex="{x:Bind ViewModel.CurrentPosition, Mode=TwoWay}"
+                      IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical"
+                                    MinWidth="200">
+                            <TextBlock Padding="5,0,5,0"
+                                       Text="{Binding Naziv}"
+                                       Style="{StaticResource BodyTextBlockStyle}"/>
+                            <TextBlock Padding="5,0,5,0"
+                                       Text="{Binding MjestoSjedistaLookup.Value}"
+                                       Margin="5,0,0,0"
+                                       Style="{StaticResource CaptionTextBlockStyle}"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </RelativePanel>
+        <StackPanel Name="DetailsSP"
+                    Orientation="Vertical"
+                    RelativePanel.RightOf="PartnerListRelativePanel"
+                    RelativePanel.AlignTopWith="PartnerListRelativePanel"
+                    Margin="10"
+                    Visibility="{x:Bind ViewModel.ShowDetails, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}">
+            <TextBlock Text="Novi partner"
+                       Margin="5"
+                       Style="{StaticResource TitleTextBlockStyle}"
+                       Visibility="{x:Bind ViewModel.IsNewItem, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
+            <TextBlock Text="Osnovni podaci"
+                       Margin="2"
+                       Style="{StaticResource SubtitleTextBlockStyle}"/>
+            <RelativePanel Name="DetailsPanel"
+                           Margin="24,8,8,8">
+                <StackPanel Name="TipPartneraSP"
+                            Orientation="Horizontal">
+                    <TextBlock Name="TipPartneraextBlock"
+                               Text="Tip partnera: "
+                               Margin="10"/>
+                    <RadioButton Name="TvrtkaRadioButton"
+                                 Content="Tvrtka"
+                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                 IsChecked="{x:Bind ViewModel.TipPartnera, Mode=TwoWay, Converter={StaticResource TvrtkaToTrueConverter}}"/>
+                    <RadioButton Name="OsobaRadioButton"
+                                 Content="Osoba"
+                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                 IsChecked="{x:Bind ViewModel.TipPartnera, Mode=TwoWay, Converter={StaticResource OsobaToTrueConverter}}"/>
+                </StackPanel>
+                <StackPanel Name="GeneralDataSP"
+                            Orientation="Vertical"
+                            RelativePanel.Below="TipPartneraSP">
+                    <Grid Name="OIBGrid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Name="OIBTextBlock"
+                                   Text="OIB"
+                                   Grid.Row="0"
+                                   Grid.Column="0"
+                                   Margin="10"/>
+                        <TextBox Name="OIBTextBox"
+                                 Text="{x:Bind ViewModel.CurrentPartner.OIB, Mode=TwoWay}"
+                                 Grid.Row="0"
+                                 Grid.Column="1"
+                                 Width="250"
+                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                    </Grid>
+                    <Grid Name="OsobaGrid"
+                          Visibility="{x:Bind ViewModel.TipPartnera, Mode=OneWay, Converter={StaticResource OsobaToVisibleConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Ime"
+                                   Margin="10"
+                                   Grid.Row="0"
+                                   Grid.Column="0"/>
+                        <TextBox Name="ImeTextBox"
+                                 Text="{x:Bind ViewModel.CurrentPartner.ImeOsobe, Mode=TwoWay}"
+                                 Grid.Row="0"
+                                 Grid.Column="1"
+                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                        <TextBlock Text="Prezime"
+                                   Margin="10"
+                                   Grid.Row="1"
+                                   Grid.Column="0"/>
+                        <TextBox Name="PrezimeTextBox"
+                                 Text="{x:Bind ViewModel.CurrentPartner.PrezimeOsobe, Mode=TwoWay}"
+                                 Grid.Row="1"
+                                 Grid.Column="1"
+                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                    </Grid>
+                    <Grid Name="TvrtkaGrid"
+                          Visibility="{x:Bind ViewModel.TipPartnera, Mode=OneWay, Converter={StaticResource TvrtkaToVisibleConverter}}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="100"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Matični broj"
+                                   Margin="10"
+                                   Grid.Row="0"
+                                   Grid.Column="0"/>
+                        <TextBox Name="MatBrTvrtkeTextBox"
+                                 Text="{x:Bind ViewModel.CurrentPartner.MatBrTvrtke, Mode=TwoWay}"
+                                 Grid.Row="0"
+                                 Grid.Column="1"
+                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                        <TextBlock Text="Naziv tvrtke"
+                                   Margin="10"
+                                   Grid.Row="1"
+                                   Grid.Column="0"/>
+                        <TextBox Name="NazivTvrtkeTextBox"
+                                 Text="{x:Bind ViewModel.CurrentPartner.NazivTvrtke, Mode=TwoWay}"
+                                 Grid.Row="1"
+                                 Grid.Column="1"
+                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                    </Grid>
+                </StackPanel>
+            </RelativePanel>
+            <TextBlock Text="Adresa sjedišta"
+                       Margin="2"
+                       Style="{StaticResource SubtitleTextBlockStyle}"/>
+            <Grid Name="SjedisteGrid"
+                  Margin="24,8,8,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Adresa"
+                           Margin="10"
+                           Grid.Row="0"
+                           Grid.Column="0"/>
+                <TextBox Name="AdresaSjedistaTextBox"
+                         Text="{x:Bind ViewModel.CurrentPartner.AdrPartnera, Mode=TwoWay}"
+                         Grid.Row="0"
+                         Grid.Column="1"
+                         IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                <TextBlock Text="Mjesto"
+                           Margin="10"
+                           Grid.Row="1"
+                           Grid.Column="0"/>
+                <ComboBox Name="MjSjedistaCombobox"
+                          Width="250"
+                          Height="40"
+                          Grid.Row="1"
+                          Grid.Column="1"
+                          ItemsSource="{x:Bind ViewModel.MjestoLookupList, Mode=OneWay}"
+                          DisplayMemberPath="Value"
+                          SelectedItem="{x:Bind ViewModel.CurrentPartner.MjestoSjedistaLookup, Mode=TwoWay}"
+                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+            </Grid>
+            <TextBlock Text="Adresa isporuke"
+                       Margin="2"
+                       Style="{StaticResource SubtitleTextBlockStyle}"/>
+            <Grid Name="IsporukaGrid"
+                  Margin="24,8,8,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="100"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Adresa"
+                           Margin="10"
+                           Grid.Row="0"
+                           Grid.Column="0"/>
+                <TextBox Name="AdresaIsporukeTextBox"
+                         Text="{x:Bind ViewModel.CurrentPartner.AdrIsporuke, Mode=TwoWay}"
+                         Grid.Row="0"
+                         Grid.Column="1"
+                         IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                <TextBlock Text="Mjesto"
+                           Margin="10"
+                           Grid.Row="1"
+                           Grid.Column="0"/>
+                <ComboBox Name="MjestoIsporukeComboBox"
+                          Width="250"
+                          Height="40"
+                          Grid.Row="1"
+                          Grid.Column="1"
+                          ItemsSource="{x:Bind ViewModel.MjestoLookupList, Mode=OneWay}"
+                          DisplayMemberPath="Value"
+                          SelectedItem="{x:Bind ViewModel.CurrentPartner.MjestoIsporukeLookup, Mode=TwoWay}"
+                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+            </Grid>
         </StackPanel>
-    </StackPanel>
+    </RelativePanel>
 </Page>

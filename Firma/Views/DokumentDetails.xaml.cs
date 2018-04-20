@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
-using Firma.ViewModel;
+using ViewModel;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -21,28 +21,18 @@ namespace Firma.Views
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class ArtiklDetails : Page
+    public sealed partial class DokumentDetails : Page
     {
-        private ArtiklViewModel ViewModel;
-        public ArtiklDetails()
+        private DokumentViewModel ViewModel;
+        public DokumentDetails()
         {
-            ViewModel = new ArtiklViewModel();
+            ViewModel = new DokumentViewModel();
             this.InitializeComponent();
-            this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
-            // Navigation logic
-            Frame rootFrame = Window.Current.Content as Frame;
-            if (rootFrame.CanGoBack)
-            {
-                Windows.UI.Core.SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.Visible;
-            }
-            else
-            {
-                Windows.UI.Core.SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.Collapsed;
-            }
+            await ViewModel.Load();
         }
 
         private bool On_BackRequested()
@@ -58,6 +48,17 @@ namespace Firma.Views
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             On_BackRequested();
+        }
+
+        private void SearchABox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            ViewModel.Filter = sender.Text;
+        }
+
+        private void DeleteButton_Click(object sender, RoutedEventArgs e)
+        {
+            var current = ((sender as Button).Tag as Firma.Model.Stavka);
+            ViewModel.RemoveStavka(current);
         }
     }
 }

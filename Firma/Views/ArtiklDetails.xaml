@@ -5,17 +5,24 @@
     xmlns:local="using:Firma.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:helper="using:Firma.Helpers"
+    xmlns:helper="using:Firma.Converters"
     mc:Ignorable="d">
     <Page.Resources>
         <helper:DecimalToStringConverter x:Key="DecimalToStringConverter"/>
+        <helper:TrueToVisibleConverter x:Key="TrueToVisibleConverter"/>
     </Page.Resources>
 
     <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Button Name="BackButton"
+                Style="{StaticResource NavigationBackButtonNormalStyle}"
+                RelativePanel.AlignTopWithPanel="True"
+                RelativePanel.AlignLeftWithPanel="True"
+                Click="BackButton_Click"/>
         <TextBlock x:Name="NaslovTextBlock"
                    Text="Pregled artikala"
                    Style="{StaticResource TitleTextBlockStyle}"
-                   Margin="25,5,0,24"/>
+                   Margin="7,7,0,24"
+                   RelativePanel.RightOf="BackButton"/>
         <StackPanel Name="NavigationStackPanel"
                     Orientation="Horizontal"
                     RelativePanel.RightOf="NaslovTextBlock"
@@ -48,28 +55,32 @@
                           Label="Spremi"
                           Icon="Save"
                           IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                          Click="{x:Bind ViewModel.Save}"/>
+                          Click="{x:Bind ViewModel.Save}"
+                          Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
             <AppBarButton Name="CancelButton"
                           Label="Odustani"
                           Icon="Cancel"
                           IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                          Click="{x:Bind ViewModel.Cancel}"/>
-            <AppBarSeparator/>
+                          Click="{x:Bind ViewModel.Cancel}"
+                          Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
             <AppBarButton Name="EditButton"
                           Label="Izmjeni"
                           Icon="Edit"
                           IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
-                          Click="{x:Bind ViewModel.Edit}"/>
+                          Click="{x:Bind ViewModel.Edit}"
+                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
             <AppBarButton Name="DeleteButton"
                           Label="Izbriši"
                           Icon="Delete"
                           IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
-                          Click="{x:Bind ViewModel.Delete}"/>
+                          Click="{x:Bind ViewModel.Delete}"
+                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
             <AppBarButton Name="NewButton"
                           Label="Novi zapis"
                           Icon="Add"
                           IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
-                          Click="{x:Bind ViewModel.New}"/>
+                          Click="{x:Bind ViewModel.New}"
+                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
         </CommandBar>
         <Grid RelativePanel.Below="NaslovTextBlock"
               RelativePanel.AlignLeftWithPanel="True">
@@ -123,7 +134,7 @@
             <TextBox Name="CijArtiklaTextBox"
                      IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
                      InputScope="Number"
-                     Text="{x:Bind ViewModel.CurrentArtikl.CijArtkila, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
+                     Text="{x:Bind ViewModel.CurrentArtikl.CijArtikla, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
                      Grid.Row="3"
                      Grid.Column="1"/>
             <TextBlock Text="Usluga"
