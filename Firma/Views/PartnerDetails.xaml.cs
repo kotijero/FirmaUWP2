@@ -73,5 +73,10 @@ namespace Firma.Views
         {
             On_BackRequested();
         }
+
+        private void ValidateOnFocusLost(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ValidateProperty((sender as TextBox).Tag as string);
+        }
     }
 }

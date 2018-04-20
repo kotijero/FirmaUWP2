@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Firma.Model
 {
-    public class Stavka : NotifyPropertyChanged
+    public class Stavka : ObservableModel
     {
         public Stavka()
         {

@@ -11,7 +11,7 @@ using Windows.UI.Xaml.Controls;
 
 namespace ViewModel
 {
-    public class DokumentViewModel : NotifyPropertyChanged
+    public class DokumentViewModel : ObservableModel
     {
         public DokumentViewModel()
         {

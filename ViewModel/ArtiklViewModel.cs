@@ -12,7 +12,7 @@ using Windows.UI.Xaml.Controls;
 
 namespace Firma.ViewModel
 {
-    public class ArtiklViewModel : NotifyPropertyChanged
+    public class ArtiklViewModel : ObservableModel
     {
         public ArtiklViewModel()
         {

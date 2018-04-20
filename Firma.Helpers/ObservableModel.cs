@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Firma.Helpers
 {
-    public abstract class NotifyPropertyChanged : INotifyPropertyChanged
+    public abstract class ObservableModel : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 

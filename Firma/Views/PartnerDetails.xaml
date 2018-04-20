@@ -14,6 +14,7 @@
         <converters:TvrtkaToVisibleConverter x:Key="TvrtkaToVisibleConverter"/>
         <converters:TrueToVisibleConverter x:Key="TrueToVisibleConverter"/>
         <converters:FalseToVisibleConverter x:Key="FalseToVisibleConverter"/>
+        <converters:StringContentToVisibleConverter x:Key="StringContentToVisibleConverter"/>
     </Page.Resources>
 
     <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -145,12 +146,28 @@
                                    Grid.Row="0"
                                    Grid.Column="0"
                                    Margin="10"/>
-                        <TextBox Name="OIBTextBox"
-                                 Text="{x:Bind ViewModel.CurrentPartner.OIB, Mode=TwoWay}"
-                                 Grid.Row="0"
-                                 Grid.Column="1"
-                                 Width="250"
-                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                        <Grid Grid.Row="0"
+                              Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <TextBox Name="OIBTextBox"
+                                     Text="{x:Bind ViewModel.CurrentPartner.OIB, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Grid.Row="0"
+                                     Width="250"
+                                     LostFocus="ValidateOnFocusLost"
+                                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                     Tag="OIB"/>
+                            <TextBlock Name="ErrorOIBTextBlock"
+                                       Grid.Row="1"
+                                       Text="{x:Bind ViewModel.Errors.OIB, Mode=OneWay}"
+                                       Foreground="Red"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Visibility="{x:Bind ViewModel.Errors.OIB, Mode=OneWay, Converter={StaticResource StringContentToVisibleConverter}}"/>
+                        </Grid>
+
+
                     </Grid>
                     <Grid Name="OsobaGrid"
                           Visibility="{x:Bind ViewModel.TipPartnera, Mode=OneWay, Converter={StaticResource OsobaToVisibleConverter}}">
@@ -166,20 +183,49 @@
                                    Margin="10"
                                    Grid.Row="0"
                                    Grid.Column="0"/>
-                        <TextBox Name="ImeTextBox"
-                                 Text="{x:Bind ViewModel.CurrentPartner.ImeOsobe, Mode=TwoWay}"
-                                 Grid.Row="0"
-                                 Grid.Column="1"
-                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                        <Grid Grid.Row="0"
+                              Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBox Name="ImeTextBox"
+                                     Text="{x:Bind ViewModel.CurrentPartner.ImeOsobe, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                                     LostFocus="ValidateOnFocusLost"
+                                     Tag="ImeOsobe"
+                                     Grid.Row="0"
+                                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                            <TextBlock Name="ImeErrorTextBlock"
+                                       Text="{x:Bind ViewModel.Errors.ImeOsobe, Mode=OneWay}"
+                                       Grid.Row="1"
+                                       Foreground="Red"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Visibility="{x:Bind ViewModel.Errors.ImeOsobe, Mode=OneWay, Converter={StaticResource StringContentToVisibleConverter}}"/>
+                        </Grid>
+
                         <TextBlock Text="Prezime"
                                    Margin="10"
                                    Grid.Row="1"
                                    Grid.Column="0"/>
-                        <TextBox Name="PrezimeTextBox"
-                                 Text="{x:Bind ViewModel.CurrentPartner.PrezimeOsobe, Mode=TwoWay}"
-                                 Grid.Row="1"
-                                 Grid.Column="1"
-                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                        <Grid Grid.Row="1"
+                              Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBox Name="PrezimeTextBox"
+                                     Text="{x:Bind ViewModel.CurrentPartner.PrezimeOsobe, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Grid.Row="0"
+                                     LostFocus="ValidateOnFocusLost"
+                                     Tag="PrezimeOsobe"
+                                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                            <TextBlock Name="ErrorPrezimeTextBlock"
+                                       Text="{x:Bind ViewModel.Errors.PrezimeOsobe, Mode=OneWay}"
+                                       Grid.Row="1"
+                                       Foreground="Red"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Visibility="{x:Bind ViewModel.Errors.PrezimeOsobe, Converter={StaticResource StringContentToVisibleConverter}}"/>
+                        </Grid>
                     </Grid>
                     <Grid Name="TvrtkaGrid"
                           Visibility="{x:Bind ViewModel.TipPartnera, Mode=OneWay, Converter={StaticResource TvrtkaToVisibleConverter}}">
@@ -195,20 +241,51 @@
                                    Margin="10"
                                    Grid.Row="0"
                                    Grid.Column="0"/>
-                        <TextBox Name="MatBrTvrtkeTextBox"
-                                 Text="{x:Bind ViewModel.CurrentPartner.MatBrTvrtke, Mode=TwoWay}"
-                                 Grid.Row="0"
-                                 Grid.Column="1"
-                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                        <Grid Grid.Row="0"
+                              Grid.Column="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="19*"/>
+                                <ColumnDefinition Width="6*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBox Name="MatBrTvrtkeTextBox"
+                                     Text="{x:Bind ViewModel.CurrentPartner.MatBrTvrtke, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     LostFocus="ValidateOnFocusLost"
+                                     Tag="MatBrTvrtke"
+                                     Grid.Row="0"
+                                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}" Grid.ColumnSpan="2" Margin="0,0,-1,0"/>
+                            <TextBlock Name="ErrorMatBrTvrtkeTextBlock"
+                                       Text="{x:Bind ViewModel.Errors.MatBrTvrtke, Mode=OneWay}"
+                                       Grid.Row="1"
+                                       Foreground="Red"
+                                       Style="{StaticResource CaptionTextBlockStyle}" Grid.ColumnSpan="2" Margin="0,0,-1,0"/>
+                        </Grid>
+
                         <TextBlock Text="Naziv tvrtke"
                                    Margin="10"
                                    Grid.Row="1"
                                    Grid.Column="0"/>
-                        <TextBox Name="NazivTvrtkeTextBox"
-                                 Text="{x:Bind ViewModel.CurrentPartner.NazivTvrtke, Mode=TwoWay}"
-                                 Grid.Row="1"
-                                 Grid.Column="1"
-                                 IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                        <Grid Grid.Row="1"
+                              Grid.Column="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBox Name="NazivTvrtkeTextBox"
+                                     Text="{x:Bind ViewModel.CurrentPartner.NazivTvrtke, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     LostFocus="ValidateOnFocusLost"
+                                     Tag="NazivTvrtke"
+                                     Grid.Row="0"
+                                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                            <TextBlock Name="ErrorNazivTvrtkeTextBlock"
+                                       Text="{x:Bind ViewModel.Errors.NazivTvrtke, Mode=OneWay}"
+                                       Foreground="Red"
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Grid.Row="1"/>
+                        </Grid>
                     </Grid>
                 </StackPanel>
             </RelativePanel>
@@ -229,11 +306,25 @@
                            Margin="10"
                            Grid.Row="0"
                            Grid.Column="0"/>
-                <TextBox Name="AdresaSjedistaTextBox"
-                         Text="{x:Bind ViewModel.CurrentPartner.AdrPartnera, Mode=TwoWay}"
-                         Grid.Row="0"
-                         Grid.Column="1"
-                         IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                <Grid Grid.Row="0"
+                      Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBox Name="AdresaSjedistaTextBox"
+                             Text="{x:Bind ViewModel.CurrentPartner.AdrPartnera, Mode=TwoWay}"
+                             Grid.Row="0"
+                             LostFocus="ValidateOnFocusLost"
+                             Tag="AdrPartnera"
+                             IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                    <TextBlock Name="ErrorAdrSjedistaTextBlock"
+                               Text="{x:Bind ViewModel.Errors.AdrPartnera, Mode=OneWay}"
+                               Grid.Row="1"
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="Red"/>
+                </Grid>
+
                 <TextBlock Text="Mjesto"
                            Margin="10"
                            Grid.Row="1"
@@ -265,11 +356,22 @@
                            Margin="10"
                            Grid.Row="0"
                            Grid.Column="0"/>
-                <TextBox Name="AdresaIsporukeTextBox"
-                         Text="{x:Bind ViewModel.CurrentPartner.AdrIsporuke, Mode=TwoWay}"
+                <Grid Grid.Row="0"
+                      Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBox Name="AdresaIsporukeTextBox"
+                         Text="{x:Bind ViewModel.CurrentPartner.AdrIsporuke, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          Grid.Row="0"
-                         Grid.Column="1"
                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                    <TextBlock Name="ErrorAdrIsporukeTextBlock"
+                               Text="{x:Bind ViewModel.Errors.AdrIsporuke, Mode=OneWay}"
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="Red"
+                               Grid.Row="1"/>
+                </Grid>
                 <TextBlock Text="Mjesto"
                            Margin="10"
                            Grid.Row="1"

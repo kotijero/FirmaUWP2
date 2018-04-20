@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Firma.Model
 {
-    public class Artikl : NotifyPropertyChanged
+    public class Artikl : ObservableModel
     {
         #region Constructors
         public Artikl()
@@ -129,6 +129,33 @@ namespace Firma.Model
                     tekstArtikla = value;
                     OnPropertyChanged();
                 }
+            }
+        }
+
+        #endregion
+
+        #region Validation
+
+        public void Validate(string propertyName)
+        {
+            if (propertyName.Equals(nameof(SifArtikla)))
+            {
+
+            } else if (propertyName.Equals(nameof(NazArtikla)))
+            {
+
+            } else if (propertyName.Equals(nameof(JedMjere)))
+            {
+
+            } else if (propertyName.Equals(nameof(CijArtikla)))
+            {
+
+            } else if (propertyName.Equals(nameof(ZastUsluga)))
+            {
+
+            } else if (propertyName.Equals(nameof(TekstArtikla)))
+            {
+
             }
         }
 

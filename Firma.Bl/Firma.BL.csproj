@@ -111,6 +111,9 @@
     <Compile Include="BlMjesto.cs" />
     <Compile Include="BlPartner.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ValidationModels\ArtiklValidationModel.cs" />
+    <Compile Include="ValidationModels\PartnerValidationModel.cs" />
+    <Compile Include="ValidationModels\ValidationModelBase.cs" />
     <EmbeddedResource Include="Properties\Firma.Bl.rd.xml" />
   </ItemGroup>
   <ItemGroup>

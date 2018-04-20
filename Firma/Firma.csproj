@@ -101,6 +101,7 @@
     <Compile Include="Converters\FalseToVisibleConverter.cs" />
     <Compile Include="Converters\OsobaToTrueConverter.cs" />
     <Compile Include="Converters\OsobaToVisibleConverter.cs" />
+    <Compile Include="Converters\StringContentToVisibleConverter.cs" />
     <Compile Include="Converters\TrueToVisibleConverter.cs" />
     <Compile Include="Converters\TvrtkaToTrueConverter.cs" />
     <Compile Include="Converters\TvrtkaToVisibleConverter.cs" />
@@ -162,6 +163,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Firma.Bl\Firma.BL.csproj">
+      <Project>{0227d619-25f3-4db8-8c57-fb4fd8abff86}</Project>
+      <Name>Firma.BL</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Firma.Helpers\Firma.Helpers.csproj">
       <Project>{68829ad2-ac1b-4338-9181-b9233746a74d}</Project>
       <Name>Firma.Helpers</Name>

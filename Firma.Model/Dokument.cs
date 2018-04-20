@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Firma.Model
 { 
-    public class Dokument : NotifyPropertyChanged
+    public class Dokument : ObservableModel
     {
         public Dokument()
         {

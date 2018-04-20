@@ -1,4 +1,5 @@
 ﻿using Firma.Bl;
+using Firma.Bl.ValidationModels;
 using Firma.Helpers;
 using Firma.Model;
 using System;
@@ -13,7 +14,7 @@ using Windows.UI.Xaml.Controls;
 
 namespace ViewModel
 {
-    public class PartnerViewModel : NotifyPropertyChanged
+    public class PartnerViewModel : ObservableModel
     {
         #region Constructor
 
@@ -66,6 +67,7 @@ namespace ViewModel
                 else
                 {
                     ShowDetails = true;
+                    Errors.ClearErrors(true);
                     OnPropertyChanged(nameof(CurrentPartner));
                     OnPropertyChanged(nameof(TipPartnera));
                 }
@@ -168,6 +170,21 @@ namespace ViewModel
 
         public async void Save()
         {
+            if (Errors.IsDirty)
+            {
+                blPartner.ValidateModel(CurrentPartner, Errors);
+                if (Errors.IsDirty)
+                {
+                    ContentDialog validationDialog = new ContentDialog
+                    {
+                        Title = "Greška unosa",
+                        Content = "Unos podataka nije korektan. Potrebno ispraviti prije spremanja.",
+                        PrimaryButtonText = "U redu"
+                    };
+                    await validationDialog.ShowAsync();
+                    return;
+                }
+            }
             ContentDialog dialog = new ContentDialog
             {
                 Title = "Potvrda spremanja",
@@ -280,6 +297,18 @@ namespace ViewModel
                     await warningDialog.ShowAsync();
                 }
             }
+        }
+
+        #endregion
+
+        #region Validation
+
+        public PartnerValidationModel Errors { get; set; } = new PartnerValidationModel();
+
+        public void ValidateProperty(string propertyName)
+        {
+            if (inEditMode)
+                blPartner.ValidateProperty(CurrentPartner, Errors, propertyName);
         }
 
         #endregion
