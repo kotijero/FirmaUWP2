@@ -242,6 +242,7 @@ namespace ViewModel.DomainViewModels
 
         public override string Save()
         {
+            BlDokument.ValidateModel(CurrentItem, Errors);
             if (Errors.IsDirty || CheckStavkeIsDirty())
             {
                 return "Detektirane greške unosa.";

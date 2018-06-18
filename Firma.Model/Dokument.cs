@@ -203,7 +203,7 @@ namespace Firma.Model
                 BrDokumenta = brDokumenta,
                 DatDokumenta = datDokumenta,
                 IdPartnera = idPartnera,
-                IdPrethDokumenta = IdPrethDokumenta,
+                IdPrethDokumenta = IdPrethDokumenta.HasValue ? (IdPrethDokumenta.Value == -1 ? null : IdPrethDokumenta) : null,
                 PostoPorez = postoPorez,
                 IznosDokumenta = iznosDokumenta
             };

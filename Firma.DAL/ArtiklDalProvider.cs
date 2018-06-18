@@ -14,8 +14,9 @@ namespace Firma.DAL
     {
         public Artikl Fetch(int Id)
         {
-            string query = "SELECT * FROM Artikl WHERE Id = " + Id;
-            DataTable result = QueryExecutor.ExecuteQuery(query);
+            string query = "SELECT * FROM Artikl WHERE Id = @Id";
+            
+            DataTable result = QueryExecutor.ExecuteQuery(query, new List<SqlParameter> { new SqlParameter("@Id", Id) });
             if (result.Rows.Count < 1)
             {
                 return null;

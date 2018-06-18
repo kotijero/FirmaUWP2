@@ -14,8 +14,8 @@ namespace Firma.DAL
     {
         public Partner Fetch(int Id)
         {
-            string query = "SELECT * FROM Partner WHERE Id = " + Id;
-            DataTable result = QueryExecutor.ExecuteQuery(query);
+            string query = "SELECT * FROM Partner WHERE Id = @Id";
+            DataTable result = QueryExecutor.ExecuteQuery(query, new List<SqlParameter> { new SqlParameter("@Id", Id) });
             if (result.Rows.Count < 1)
             {
                 return null;
@@ -42,7 +42,7 @@ namespace Firma.DAL
                 }
                 else
                 {
-                    DataRow osobaRow = QueryExecutor.ExecuteQuery("SELECT * FROM Osoba WHERE IdOsobe = " + Id).Rows[0];
+                    DataRow osobaRow = QueryExecutor.ExecuteQuery("SELECT * FROM Osoba WHERE IdOsobe = @Id", new List<SqlParameter> { new SqlParameter("@Id", Id) }).Rows[0];
                     Osoba osoba = new Osoba
                     {
                         ImeOsobe = (string)osobaRow["ImeOsobe"],
@@ -225,22 +225,25 @@ namespace Firma.DAL
 
         public void UpdateItem(Partner item)
         {
-            string query = String.Format(@"UPDATE Partner 
-                                              SET TipPartnera = '{1}',
-                                                  OIB = {2},
-                                                  IdMjestaPartnera = {3},
-                                                  AdrPartnera = '{4}',
-                                                  IdMjestaIsporuke = {5}, 
-                                                  AdrIsporuke = '{6}'
-                                                WHERE IdPartnera = {0}",
-                                                item.IdPartnera,
-                                                item.TipPartnera,
-                                                item.OIB,
-                                                item.IdMjestaPartnera,
-                                                item.AdrPartnera,
-                                                item.IdMjestaIsporuke,
-                                                item.AdrIsporuke);
-            QueryExecutor.ExecuteNonQuery(query);
+            string query = @"UPDATE Partner 
+                                SET TipPartnera = @TipPartnera,
+                                    OIB = @OIB,
+                                    IdMjestaPartnera = @IdMjestaPartnera,
+                                    AdrPartnera = @AdrPartnera,
+                                    IdMjestaIsporuke = @IdMjestaIsporuke, 
+                                    AdrIsporuke = @AdrIsporuke
+                              WHERE IdPartnera = @IdPartnera";
+            List<SqlParameter> sqlParameters = new List<SqlParameter>
+            {
+                new SqlParameter("@TipPartnera", item.TipPartnera),
+                new SqlParameter("@OIB", item.OIB),
+                new SqlParameter("@IdMjestaPartnera", (object)item.IdMjestaPartnera ?? DBNull.Value),
+                new SqlParameter("@AdrPartnera", item.AdrPartnera),
+                new SqlParameter("@IdMjestaIsporuke", (object)item.IdMjestaIsporuke ?? DBNull.Value),
+                new SqlParameter("@AdrIsporuke", item.AdrIsporuke),
+                new SqlParameter("@IdPartnera", item.IdPartnera)
+            };
+            QueryExecutor.ExecuteNonQuery(query, sqlParameters);
             if (item.TipPartnera.Equals(Constants.OsobaTip))
             {
                 Osoba osoba = (Osoba)item;
@@ -277,17 +280,17 @@ namespace Firma.DAL
             string query = string.Empty;
             if (item.TipPartnera.Equals(Constants.OsobaTip))
             {
-                query = $"DELETE FROM Osoba WHERE IdOsobe = {item.IdPartnera}";
-                if (QueryExecutor.ExecuteNonQuery(query) < 1) return false;
+                query = $"DELETE FROM Osoba WHERE IdOsobe = @IdOsobe";
+                if (QueryExecutor.ExecuteNonQuery(query, new List<SqlParameter> { new SqlParameter("@IdOsobe", item.IdPartnera) }) < 1) return false;
             }
             else
             {
-                query = $"DELETE FROM Tvrtka WHERE IdTvrtke = {item.IdPartnera}";
-                if (QueryExecutor.ExecuteNonQuery(query) < 1) return false;
+                query = $"DELETE FROM Tvrtka WHERE IdTvrtke = @IdPartnera";
+                if (QueryExecutor.ExecuteNonQuery(query, new List<SqlParameter> { new SqlParameter("@IdPartnera", item.IdPartnera) }) < 1) return false;
             }
 
-            query = $"DELETE FROM Partner WHERE IdPartnera = {item.IdPartnera}";
-            if (QueryExecutor.ExecuteNonQuery(query) < 1) return false;
+            query = $"DELETE FROM Partner WHERE IdPartnera = @IdPartnera";
+            if (QueryExecutor.ExecuteNonQuery(query, new List<SqlParameter> { new SqlParameter("@IdPartnera", item.IdPartnera) }) < 1) return false;
             
             return true;
         }

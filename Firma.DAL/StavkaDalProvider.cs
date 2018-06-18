@@ -144,8 +144,8 @@ namespace Firma.DAL
 
         public bool CheckStavkeForSifArtikla(int sifArtikla)
         {
-            string query = $"SELECT COUNT(*) FROM Stavka WHERE SifArtikla = {sifArtikla}";
-            var res = QueryExecutor.ExecuteQuery(query);
+            string query = "SELECT COUNT(*) FROM Stavka WHERE SifArtikla = @SifArtikla";
+            var res = QueryExecutor.ExecuteQuery(query, new List<SqlParameter> { new SqlParameter("@SifArtikla", sifArtikla) });
             return (int)(res.Rows)[0][0] > 0;
         }
     }

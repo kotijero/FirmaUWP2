@@ -15,7 +15,7 @@ namespace Firma.DAL
         public Mjesto Fetch(int Id)
         {
             string query = "SELECT * FROM Mjesto WHERE Id = @Id";
-            DataTable result = QueryExecutor.ExecuteQuery(query, new List<System.Data.SqlClient.SqlParameter> { new System.Data.SqlClient.SqlParameter("@Id", Id) });
+            DataTable result = QueryExecutor.ExecuteQuery(query, new List<SqlParameter> { new SqlParameter("@Id", Id) });
             if (result.Rows.Count < 1)
             {
                 return null;
@@ -111,8 +111,8 @@ namespace Firma.DAL
 
         public LookupModel FetchSingleLookup(int Id)
         {
-            string query = $"SELECT IdMjesta, NazMjesta FROM Mjesto WHERE IdMjesta = {Id}";
-            DataTable result = QueryExecutor.ExecuteQuery(query);
+            string query = $"SELECT IdMjesta, NazMjesta FROM Mjesto WHERE IdMjesta = @Id";
+            DataTable result = QueryExecutor.ExecuteQuery(query, new List<SqlParameter> { new SqlParameter("@Id", Id) });
             return new LookupModel(Id, (string)result.Rows[0][1]);
         }
         public List<LookupModel> FetchLookup()

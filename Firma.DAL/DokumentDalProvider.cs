@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -99,16 +100,19 @@ namespace Firma.DAL
 
         public Dokument AddItem(Dokument item)
         {
-            string query = String.Format(@"INSERT INTO Dokument (VrDokumenta, BrDokumenta, DatDokumenta, IdPartnera, IdPrethDokumenta, PostoPorez, IznosDokumenta)
-                                            OUTPUT inserted.IdDokumenta VALUES ({0}, {1}, {2}, {3}, {4}, {5}, {6})",
-                                            item.VrDokumenta,
-                                            item.BrDokumenta,
-                                            item.DatDokumenta,
-                                            item.IdPartnera,
-                                            item.IdPrethDokumenta,
-                                            item.PostoPorez,
-                                            item.IznosDokumenta);
-            int result = (int)QueryExecutor.ExecuteQuery(query).Rows[0].ItemArray[0];
+            string query = @"INSERT INTO Dokument (VrDokumenta, BrDokumenta, DatDokumenta, IdPartnera, IdPrethDokumenta, PostoPorez, IznosDokumenta)
+                                  OUTPUT inserted.IdDokumenta VALUES (@VrDokumenta, @BrDokumenta, @DatDokumenta, @IdPartnera, @IdPrethDokumenta, @PostoPorez, @IznosDokumenta)";
+            List<SqlParameter> sqlParameters = new List<SqlParameter>
+            {
+                new SqlParameter("@VrDokumenta", item.VrDokumenta),
+                new SqlParameter("@BrDokumenta", item.BrDokumenta),
+                new SqlParameter("@DatDokumenta", item.DatDokumenta),
+                new SqlParameter("@IdPartnera", item.IdPartnera),
+                new SqlParameter("@IdPrethDokumenta", (object)item.IdPrethDokumenta ?? DBNull.Value),
+                new SqlParameter("@PostoPorez", item.PostoPorez),
+                new SqlParameter("@IznosDokumenta", item.IznosDokumenta)
+            };
+            int result = (int)QueryExecutor.ExecuteQuery(query, sqlParameters).Rows[0].ItemArray[0];
             item.IdDokumenta = result;
             return item;
         }
@@ -116,46 +120,27 @@ namespace Firma.DAL
         public void UpdateItem(Dokument item)
         {
             string query;
-            if (item.IdPrethDokumenta != null)
-            {
-                query = String.Format(@"UPDATE Dokument
-                                              SET VrDokumenta = '{0}',
-                                                  BrDokumenta = {1},
-                                                  DatDokumenta = '{2}',
-                                                  IdPartnera = {3},
-                                                  IdPrethDokumenta = {4},
-                                                  PostoPorez = {5},
-                                                  IznosDokumenta = {6}
-                                            WHERE IdDokumenta = {7}",
-                                            item.VrDokumenta,
-                                            item.BrDokumenta,
-                                            item.DatDokumenta.ToString(),
-                                            item.IdPartnera,
-                                            item.IdPrethDokumenta,
-                                            item.PostoPorez,
-                                            item.IznosDokumenta,
-                                            item.IdDokumenta);
-                QueryExecutor.ExecuteNonQuery(query);
-            }
-            else
-            {
-                query = String.Format(@"UPDATE Dokument
-                                              SET VrDokumenta = '{0}',
-                                                  BrDokumenta = {1},
-                                                  DatDokumenta = '{2}',
-                                                  IdPartnera = {3},
-                                                  PostoPorez = {4},
-                                                  IznosDokumenta = {5}
-                                            WHERE IdDokumenta = {6}",
-                                            item.VrDokumenta,
-                                            item.BrDokumenta,
-                                            item.DatDokumenta.ToString(),
-                                            item.IdPartnera,
-                                            item.PostoPorez,
-                                            item.IznosDokumenta,
-                                            item.IdDokumenta);
-                QueryExecutor.ExecuteNonQuery(query);
-            }
+            query = @"UPDATE Dokument
+                         SET VrDokumenta = @VrDokumenta,
+                             BrDokumenta = @BrDokumenta,
+                             DatDokumenta = @DatDokumenta,
+                             IdPartnera = @IdPartnera,
+                             IdPrethDokumenta = @IdPrethDokumenta,
+                             PostoPorez = @PostoPorez,
+                             IznosDokumenta = @IznosDokumenta
+                       WHERE IdDokumenta = @IdDokumenta";
+            List<SqlParameter> sqlParameters = new List<SqlParameter>()
+                {
+                    new SqlParameter("@VrDokumenta", item.VrDokumenta),
+                    new SqlParameter("@BrDokumenta", item.BrDokumenta),
+                    new SqlParameter("@DatDokumenta", item.DatDokumenta),
+                    new SqlParameter("@IdPartnera", item.IdPartnera),
+                    new SqlParameter("@IdPrethDokumenta", (object)item.IdPrethDokumenta ?? DBNull.Value),
+                    new SqlParameter("@PostoPorez", item.PostoPorez),
+                    new SqlParameter("@IznosDokumenta", item.IznosDokumenta),
+                    new SqlParameter("@IdDokumenta", item.IdDokumenta)
+                };
+            QueryExecutor.ExecuteNonQuery(query, sqlParameters);
         }
 
         public string DeleteItem(Dokument dokument)
@@ -169,7 +154,7 @@ namespace Firma.DAL
         public bool CheckDokumentForMjesto(int idMjesta)
         {
             string query = "SELECT COUNT(*) FROM Dokument WHERE IdMjestaPartnera = @IdMjesta OR IdMjestaIsporuke = @IdMjesta";
-            var result = QueryExecutor.ExecuteQuery(query, new List<System.Data.SqlClient.SqlParameter> { new System.Data.SqlClient.SqlParameter("@IdMjesta", idMjesta) });
+            var result = QueryExecutor.ExecuteQuery(query, new List<SqlParameter> { new SqlParameter("@IdMjesta", idMjesta) });
             if (result != null)
             {
                 return (int)(result.Rows[0])[0] > 0;
@@ -180,7 +165,7 @@ namespace Firma.DAL
         public bool CheckDokumentForPartner(int idPartnera)
         {
             string query = "SELECT COUNT(*) FROM Dokument WHERE IdPartnera = @IdPartnera";
-            var result = QueryExecutor.ExecuteQuery(query, new List<System.Data.SqlClient.SqlParameter> { new System.Data.SqlClient.SqlParameter("@IdPartnera", idPartnera) });
+            var result = QueryExecutor.ExecuteQuery(query, new List<SqlParameter> { new SqlParameter("@IdPartnera", idPartnera) });
             if (result != null)
             {
                 return (int)(result.Rows[0])[0] > 0;
