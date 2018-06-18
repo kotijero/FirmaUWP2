@@ -14,8 +14,5 @@ namespace Firma.DTO
         public decimal KolArtikla { get; set; }
         public decimal JedCijArtikla { get; set; }
         public decimal PostoRabat { get; set; }
-
-        public virtual Artikl Artikl { get; set; }
-        public virtual Dokument Dokument { get; set; }
     }
 }

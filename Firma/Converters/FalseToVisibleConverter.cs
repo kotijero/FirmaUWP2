@@ -17,6 +17,7 @@ namespace Firma.Converters
             else
                 return Visibility.Visible;
         }
+
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
             throw new NotImplementedException();

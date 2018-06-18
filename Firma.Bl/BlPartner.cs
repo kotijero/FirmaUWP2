@@ -10,62 +10,127 @@ using System.Threading.Tasks;
 
 namespace Firma.Bl
 {
-    public class BlPartner
+    public class BlPartner : BlBase
     {
         private PartnerDalProvider partnerDalProvider = new PartnerDalProvider();
-        public Partner Fetch(int Id)
+        public ResultWrapper<Partner> Fetch(int Id)
         {
-            var partnerDto = partnerDalProvider.Fetch(Id);
-
-            MjestoDalProvider mjestoDalProvider = new MjestoDalProvider();
-            LookupModel mjestoPartneraLookup = null;
-            LookupModel mjestoIsporukeLookup = null;
-
-            if (!partnerDto.IdMjestaPartnera.Equals(-1)) mjestoPartneraLookup = mjestoDalProvider.FetchSingleLookup(partnerDto.IdMjestaPartnera.Value);
-            else mjestoPartneraLookup = Defaults.MjestoLookup;
-
-            if (!partnerDto.IdMjestaIsporuke.Equals(-1)) mjestoIsporukeLookup = mjestoDalProvider.FetchSingleLookup(partnerDto.IdMjestaIsporuke.Value);
-            else mjestoPartneraLookup = Defaults.MjestoLookup;
-
-            return new Partner(partnerDto, mjestoPartneraLookup, mjestoIsporukeLookup);
-        }
-
-        public List<Partner> FetchAll()
-        {
-            var partnerDtoList = partnerDalProvider.FetchAll();
-
-            MjestoDalProvider mjestoDalProvider = new MjestoDalProvider();
-            var mjestoLookupList = mjestoDalProvider.FetchLookup();
-
-            List<Partner> partnerList = new List<Partner>();
-            foreach(var dto in partnerDtoList)
+            Partner partner = null;
+            string errorMessage = string.Empty;
+            try
             {
-                partnerList.Add(new Partner(dto, mjestoLookupList));
+                var partnerDto = partnerDalProvider.Fetch(Id);
+
+                MjestoDalProvider mjestoDalProvider = new MjestoDalProvider();
+                LookupModel mjestoPartneraLookup = null;
+                LookupModel mjestoIsporukeLookup = null;
+
+                if (!partnerDto.IdMjestaPartnera.Equals(-1)) mjestoPartneraLookup = mjestoDalProvider.FetchSingleLookup(partnerDto.IdMjestaPartnera.Value);
+                else mjestoPartneraLookup = Defaults.MjestoLookup;
+
+                if (!partnerDto.IdMjestaIsporuke.Equals(-1)) mjestoIsporukeLookup = mjestoDalProvider.FetchSingleLookup(partnerDto.IdMjestaIsporuke.Value);
+                else mjestoPartneraLookup = Defaults.MjestoLookup;
+
+                partner = new Partner(partnerDto, mjestoPartneraLookup, mjestoIsporukeLookup);
+            } catch (Exception exc)
+            {
+                errorMessage = HandleException(exc);
             }
-            return partnerList;
+            return new ResultWrapper<Partner>(partner, errorMessage);
         }
 
-        public Partner AddItem(Partner item)
+        public ResultWrapper<List<Partner>> FetchAll()
         {
-            DTO.Partner partnerDto = partnerDalProvider.AddItem(item.ToDTO());
-            item.IdPartnera = partnerDto.IdPartnera;
-            return item;
+            List<Partner> partnerList = null;
+            string errorMessage = string.Empty;
+            try
+            {
+                var partnerDtoList = partnerDalProvider.FetchAll();
+
+                MjestoDalProvider mjestoDalProvider = new MjestoDalProvider();
+                var mjestoLookupList = mjestoDalProvider.FetchLookup();
+
+                partnerList = new List<Partner>();
+                foreach (var dto in partnerDtoList)
+                {
+                    partnerList.Add(new Partner(dto, mjestoLookupList));
+                }
+            }
+            catch (Exception exc)
+            {
+                errorMessage = HandleException(exc);
+            }
+            return new ResultWrapper<List<Partner>>(partnerList, errorMessage);
+         }
+        public ResultWrapper<Partner> AddItem(Partner item)
+        {
+            Partner partner = null;
+            string errorMessage = string.Empty;
+            try
+            {
+                DTO.Partner partnerDto = partnerDalProvider.AddItem(item.ToDTO());
+                item.IdPartnera = partnerDto.IdPartnera;
+                partner = item;
+            } catch (Exception exc)
+            {
+                errorMessage = HandleException(exc);
+            }
+            return new ResultWrapper<Partner>(partner, errorMessage);
         }
 
-        public void UpdateItem(Partner item)
+        public ResultWrapper<Partner> UpdateItem(Partner item)
         {
-            partnerDalProvider.UpdateItem(item.ToDTO());
+            Partner partner = null;
+            string errorMessage = string.Empty;
+            try
+            {
+                partnerDalProvider.UpdateItem(item.ToDTO());
+                partner = item;
+            }
+            catch (Exception exc)
+            {
+                errorMessage = HandleException(exc);
+            }
+            return new ResultWrapper<Partner>(partner, errorMessage);
         }
 
-        public string DeleteItem(Partner item)
+        public ResultWrapper<Partner> DeleteItem(Partner item)
         {
-            return partnerDalProvider.DeleteItem(item.ToDTO());
+            Partner partner = null;
+            string errorMessage = string.Empty;
+            try
+            {
+                DokumentDalProvider dokumentDal = new DokumentDalProvider();
+                if (dokumentDal.CheckDokumentForPartner(item.IdPartnera))
+                {
+                    errorMessage = "Nije moguće obrisati partnera jer postoje njegovi dokumenti.";
+                }
+                partnerDalProvider.DeleteItem(item.ToDTO());
+                partner = item;
+            }
+            catch (Exception exc)
+            {
+                errorMessage = HandleException(exc);
+            }
+            return new ResultWrapper<Partner>(partner, errorMessage);
         }
 
-        public List<LookupModel> FetchLookup()
+        public ResultWrapper<List<LookupModel>> FetchLookup()
         {
-            return partnerDalProvider.FetchLookup();
+            List<LookupModel> lookupList = null;
+            string errorMessage = string.Empty;
+            try
+            {
+                lookupList = partnerDalProvider.FetchLookup();
+            }
+            catch (Exception exc)
+            {
+                errorMessage = HandleException(exc);
+            }
+            return new ResultWrapper<List<LookupModel>>(lookupList, errorMessage);
         }
+
+        #region Validation
 
         public void ValidateProperty(Partner partner, PartnerValidationModel validationModel, string propertyName)
         {
@@ -169,8 +234,9 @@ namespace Firma.Bl
             ValidateProperty(partner, validationModel, nameof(Partner.MatBrTvrtke));
             ValidateProperty(partner, validationModel, nameof(Partner.NazivTvrtke));
         }
+        
 
-        #region Business rules
+        #region Business Rules Constants
 
         private const int AdrPartneraMaxLength = 50;
         private const int AdrIsporukeMaxLength = 50;
@@ -182,6 +248,9 @@ namespace Firma.Bl
 
         private const int NazivTvrtkeMaxLength = 50;
         private const int MatBrTvrtkeMaxLength = 30;
+
+        #endregion
+
         #endregion
     }
 }

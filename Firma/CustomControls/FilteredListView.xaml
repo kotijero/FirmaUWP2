@@ -1,0 +1,66 @@
+﻿<UserControl
+    x:Class="Firma.CustomControls.FilteredListView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Firma.CustomControls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:helpers="using:Firma.Helpers"
+    xmlns:converters="using:Firma.Converters"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="300">
+
+    <RelativePanel MaxWidth="300">
+        <RelativePanel.Resources>
+            <converters:StringContentToVisibleConverter x:Key="StringContentToVisibleConverter"/>
+        </RelativePanel.Resources>
+        <AutoSuggestBox Name="FilterASBox"
+                        Text="{x:Bind ViewModel.Filter, Mode=TwoWay}"
+                        PlaceholderText="Pretraga"
+                        QueryIcon="Find"
+                        Margin="10"
+                        MinWidth="200"
+                        IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
+                        RelativePanel.AlignLeftWithPanel="True"
+                        RelativePanel.AlignTopWithPanel="True"
+                        RelativePanel.AlignRightWithPanel="True"/>
+        <ProgressRing Name="LoadingIndicator"
+                      RelativePanel.Below="FilterASBox"
+                      IsActive="{x:Bind ViewModel.Loading, Mode=OneWay}"
+                      HorizontalAlignment="Center"
+                      RelativePanel.AlignHorizontalCenterWith="FilterASBox"
+                      Height="50"
+                      Width="50"
+                      Margin="10"/>
+        <ListView Name="ItemsListView"
+                  RelativePanel.Below="FilterASBox"
+                  RelativePanel.AlignBottomWithPanel="True"
+                  RelativePanel.AlignLeftWithPanel="True"
+                  Margin="10"
+                  ItemsSource="{x:Bind ViewModel.ItemsList}"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                  SelectedIndex="{x:Bind ViewModel.CurrentPosition, Mode=TwoWay}"
+                  IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel MinWidth="200">
+                        <TextBlock Name="TitleTextBlock"
+                                   Text="{Binding Title}"
+                                   Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock Name="SubtitleTextBlock"
+                                   Text="{Binding Subtitle}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Visibility="{Binding Subtitle, Converter={StaticResource StringContentToVisibleConverter}}"
+                                   Foreground="Gray"/>
+                        <TextBlock Name="SubsubtitleTextBlock"
+                                   Text="{Binding Subsubtitle}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Visibility="{Binding Subsubtitle, Converter={StaticResource StringContentToVisibleConverter}}"
+                                   Foreground="Gray"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </RelativePanel>
+</UserControl>

@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
-using Firma.ViewModel;
+using System.Threading.Tasks;
+using ViewModel.DomainViewModels;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -31,17 +32,52 @@ namespace Firma.Views
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            // Navigation logic
-            Frame rootFrame = Window.Current.Content as Frame;
-            if (rootFrame.CanGoBack)
+            await Task.Run(() => ViewModel.Load());
+        }
+
+        protected async override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            base.OnNavigatingFrom(e);
+            if (ViewModel.InEditMode)
             {
-                Windows.UI.Core.SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.Visible;
+                ContentDialog contentDialog = new ContentDialog
+                {
+                    Title = "Spremanje izmjena",
+                    Content = "Želite li spremiti izmjene?",
+                    PrimaryButtonText = "Da",
+                    SecondaryButtonText = "Ne",
+                    CloseButtonText = "Natrag"
+                };
+                var response = await contentDialog.ShowAsync();
+                if (response == ContentDialogResult.Primary)
+                {
+                    var result = ViewModel.Save();
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        e.Cancel = true;
+                        ContentDialog errorDialog = new ContentDialog
+                        {
+                            Title = "Pogreška",
+                            Content = result,
+                            CloseButtonText = "U redu"
+                        };
+                        await errorDialog.ShowAsync();
+                    }
+                }
+                else if (response == ContentDialogResult.Secondary)
+                {
+                    ViewModel.Cancel();
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
             }
             else
             {
-                Windows.UI.Core.SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.Collapsed;
+                ViewModel.ShowDetails = false;
             }
         }
 

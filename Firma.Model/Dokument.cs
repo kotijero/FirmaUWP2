@@ -10,19 +10,18 @@ using System.Threading.Tasks;
 
 namespace Firma.Model
 { 
-    public class Dokument : ObservableModel
+    public class Dokument : ListableModel
     {
         public Dokument()
         {
             vrDokumenta = string.Empty;
             datDokumenta = DateTime.Now;
             
-
             partnerLookup = Defaults.PartnerLookup;
             prethodniDokumentLookup = Defaults.DokumentLookup;
         }
 
-        public Dokument(DTO.Dokument dokument)
+        public Dokument(DTO.Dokument dokument, List<Stavka> stavkaList)
         {
             idDokumenta = dokument.IdDokumenta;
             vrDokumenta = dokument.VrDokumenta;
@@ -33,26 +32,9 @@ namespace Firma.Model
             postoPorez = dokument.PostoPorez;
             iznosDokumenta = dokument.IznosDokumenta;
             
-            foreach (var stavka in dokument.Stavke)
+            foreach (var stavka in stavkaList)
             {
-                Stavke.Add(new Stavka(stavka));
-            }
-        }
-
-        public Dokument(DTO.Dokument dokument, List<Artikl> artiklList)
-        {
-            idDokumenta = dokument.IdDokumenta;
-            vrDokumenta = dokument.VrDokumenta;
-            brDokumenta = dokument.BrDokumenta;
-            datDokumenta = dokument.DatDokumenta;
-            idPartnera = dokument.IdPartnera;
-            idPrethDokumenta = dokument.IdPrethDokumenta;
-            postoPorez = dokument.PostoPorez;
-            iznosDokumenta = dokument.IznosDokumenta;
-            
-            foreach(var stavka in dokument.Stavke)
-            {
-                Stavke.Add(new Stavka(stavka, artiklList));
+                Stavke.Add(stavka);
             }
         }
 
@@ -89,6 +71,7 @@ namespace Firma.Model
             {
                 vrDokumenta = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(Title));
             }
         }
         public int BrDokumenta
@@ -98,6 +81,7 @@ namespace Firma.Model
             {
                 brDokumenta = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(Title));
             }
         }
         public DateTime DatDokumenta
@@ -146,18 +130,11 @@ namespace Firma.Model
             {
                 iznosDokumenta = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(Subsubtitle));
             }
         }
 
         public virtual ObservableCollection<Stavka> Stavke { get; set; } = new ObservableCollection<Stavka>();
-        //{
-        //    get { return stavke; }
-        //    set
-        //    {
-        //        stavke = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
 
         public LookupModel PartnerLookup
         {
@@ -169,6 +146,7 @@ namespace Firma.Model
                     partnerLookup = value;
                     if (value != null) idPartnera = value.Key;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(Subtitle));
                 }
             }
         }
@@ -195,7 +173,16 @@ namespace Firma.Model
             }
         }
 
+
+
         #endregion
+
+        public override string Title => $"{brDokumenta} ({vrDokumenta})";
+
+        public override string Subtitle => PartnerLookup.Value;
+
+        public override string Subsubtitle => $"{iznosDokumenta.ToString("N")} kn";
+
 
         public void AddStavkeFromList(List<Stavka> stavkaList, bool emptyCurrent = false)
         {
@@ -209,11 +196,6 @@ namespace Firma.Model
 
         public DTO.Dokument ToDTO()
         {
-            List<DTO.Stavka> stavkeList = new List<DTO.Stavka>();
-            foreach (var stavka in Stavke)
-            {
-                stavkeList.Add(stavka.ToDTO());
-            }
             return new DTO.Dokument
             {
                 IdDokumenta = idDokumenta,
@@ -223,8 +205,7 @@ namespace Firma.Model
                 IdPartnera = idPartnera,
                 IdPrethDokumenta = IdPrethDokumenta,
                 PostoPorez = postoPorez,
-                IznosDokumenta = iznosDokumenta,
-                Stavke = stavkeList
+                IznosDokumenta = iznosDokumenta
             };
         }
     }

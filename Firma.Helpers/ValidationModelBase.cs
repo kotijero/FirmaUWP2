@@ -1,16 +1,16 @@
-﻿using Firma.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Firma.Bl.ValidationModels
+namespace Firma.Helpers
 {
     public abstract class ValidationModelBase : ObservableModel
     {
         public ValidationModelBase()
         {
+            ClearErrors(false);
             isDirty = false;
         }
 
@@ -27,5 +27,7 @@ namespace Firma.Bl.ValidationModels
         }
 
         public abstract bool CheckDirty();
+
+        public abstract void ClearErrors(bool notify);
     }
 }

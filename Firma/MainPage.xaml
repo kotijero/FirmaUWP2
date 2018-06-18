@@ -8,6 +8,35 @@
     mc:Ignorable="d">
 
     <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <CommandBar x:Name="ActionsCommandBar"
+                    RelativePanel.AlignTopWithPanel="True"
+                    RelativePanel.AlignRightWithPanel="True"
+                    OverflowButtonVisibility="Collapsed"
+                    DefaultLabelPosition="Right">
+            <AppBarButton x:Name="LoginButton"
+                          Icon="OtherUser"
+                          Label="Odjavi se"
+                          Click="LoginButton_Click"
+                          Margin="1"/>
+            <AppBarButton x:Name="SettingsButton"
+                          Icon="Setting"
+                          Label="Postavke"
+                          Click="SettingsButton_Click"
+                          Margin="1"/>
+        </CommandBar>
+        <StackPanel Name="LoginDetailsPanel" Orientation="Horizontal"
+                    RelativePanel.AlignTopWithPanel="True"
+                    RelativePanel.LeftOf="ActionsCommandBar"
+                    Margin="11">
+            <Border BorderBrush="{StaticResource TextBoxBorderThemeBrush}"/>
+            <TextBlock Text="Korisnik: "
+                       Margin="2"/>
+            <TextBlock Text="{x:Bind ViewModel.Korisnik.Username, Mode=OneWay}"
+                       Margin="2"/>
+            <SymbolIcon Symbol="Admin"
+                        Margin="2"
+                        Visibility="{x:Bind ViewModel.Korisnik.IsAdmin,Mode=OneWay}"/>
+        </StackPanel>
         <Button Name="BackButton"
                 Style="{StaticResource NavigationBackButtonNormalStyle}"
                 RelativePanel.AlignTopWithPanel="True"
@@ -19,7 +48,7 @@
                    Text="Firma UWP 2"
                    Margin="7"
                    RelativePanel.RightOf="BackButton"/>
-        <StackPanel Orientation="Horizontal"
+        <StackPanel Name="ActionsPanel" Orientation="Horizontal"
                     RelativePanel.Below="TitleTextBlock"
                     Margin="10">
             <Button Name="ArtiklButton"
@@ -62,6 +91,47 @@
                                Style="{StaticResource SubtitleTextBlockStyle}"/>
                 </StackPanel>
             </Button>
+            <Button Name="DrzavaButton"
+                    Click="DrzavaButton_Click"
+                    Height="150"
+                    Width="150"
+                    Margin="10"
+                    IsEnabled="False">
+                <StackPanel Orientation="Horizontal">
+                    <SymbolIcon Symbol="World"
+                                Margin="5"/>
+                    <TextBlock Text="Lokacije"
+                               Margin="5"
+                               Style="{StaticResource SubtitleTextBlockStyle}"/>
+                </StackPanel>
+            </Button>
+        
         </StackPanel>
+        <Grid RelativePanel.Below="ActionsPanel"
+              Margin="11"
+              Visibility="{x:Bind ViewModel.Korisnik.IsAdmin, Mode=OneWay}">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Administratorske akcije"
+                       Style="{StaticResource SubtitleTextBlockStyle}"/>
+            <StackPanel Orientation="Horizontal"
+                        Grid.Row="1">
+                <Button Name="KorisniciButton"
+                        Click="KorisniciButton_Click"
+                        Height="150"
+                        Width="150"
+                        Margin="10">
+                    <StackPanel Orientation="Horizontal">
+                        <SymbolIcon Symbol="Admin"
+                                    Margin="5"/>
+                        <TextBlock Text="Korisnici"
+                                   Margin="5"
+                                   Style="{StaticResource SubtitleTextBlockStyle}"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
     </RelativePanel>
 </Page>

@@ -1,0 +1,94 @@
+﻿<Page
+    x:Class="Firma.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Firma.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:Firma.Converters"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <converters:IsPositiveToForegroundColorConverter x:Key="IsPositiveToForegroundColorConverter" PositiveColorBrush="Green" NegativeColorBrush="Red"/>
+        <converters:StringContentToVisibleConverter x:Key="StringContentToVisibleConverter"/>
+    </Page.Resources>
+
+    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Button Name="BackButton"
+                Style="{StaticResource NavigationBackButtonNormalStyle}"
+                RelativePanel.AlignTopWithPanel="True"
+                RelativePanel.AlignLeftWithPanel="True"
+                Click="BackButton_Click"/>
+        <SymbolIcon x:Name="SettingSymbol"
+                    Symbol="Setting"
+                    Margin="7,14,7,0"
+                    RelativePanel.RightOf="BackButton"/>
+        <TextBlock x:Name="TitleTextBlock"
+                   Text="Postavke"
+                   Style="{StaticResource TitleTextBlockStyle}"
+                   Margin="7,7,0,24"
+                   RelativePanel.RightOf="SettingSymbol"/>
+        <StackPanel x:Name="UserDataPanel"
+                    Orientation="Vertical"
+                    RelativePanel.Below="TitleTextBlock"
+                    Margin="24,24,0,0">
+            <TextBlock Text="Korisnički račun"
+                       Style="{StaticResource SubtitleTextBlockStyle}"
+                       Margin="0,0,0,6"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Korisnik:"
+                           Margin="5"/>
+                <TextBlock Text="{x:Bind ViewModel.Username}"
+                           Margin="5"/>
+            </StackPanel>
+            <PasswordBox x:Name="OldPasswordTextBox"
+                         Password="{x:Bind ViewModel.OldPassword, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         PasswordRevealMode="Peek"
+                         Header="Stara lozinka"
+                         Width="200"
+                         Margin="6"
+                         HorizontalAlignment="Left"/>
+            <PasswordBox x:Name="NewPasswordTextBox"
+                         Password="{x:Bind ViewModel.NewPassword, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                         PasswordRevealMode="Peek"
+                         Header="Nova lozinka"
+                         Width="200"
+                         Margin="6"
+                         HorizontalAlignment="Left"/>
+            <PasswordBox x:Name="NewPassword2TextBox"
+                         Password="{x:Bind ViewModel.NewPassword2, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         PasswordRevealMode="Peek"
+                         Header="Ponovljena nova lozinka"
+                         Width="200"
+                         Margin="6"
+                         HorizontalAlignment="Left"/>
+            <TextBlock x:Name="PasswordErrorTextBlock"
+                       Margin="6"
+                       Text="{x:Bind ViewModel.PasswordStatusMessage, Mode=OneWay}"
+                       Foreground="{x:Bind ViewModel.IsPositiveMessage, Mode=OneWay, Converter={StaticResource IsPositiveToForegroundColorConverter}}"
+                       Visibility="{x:Bind ViewModel.PasswordStatusMessage, Mode=OneWay, Converter={StaticResource StringContentToVisibleConverter}}"/>
+            <Button Name="SavePasswordButton"
+                    Content="Spremi novu lozinku"
+                    Click="{x:Bind ViewModel.SavePasswordChanges}"/>
+        </StackPanel>
+        <StackPanel x:Name="AdminPanel"
+              RelativePanel.Below="UserDataPanel"
+              RelativePanel.AlignLeftWithPanel="True"
+              Margin="24"
+                    Visibility="{x:Bind ViewModel.IsAdmin, Mode=OneWay}">
+            <TextBlock Text="Administratorske postavke"
+                       Grid.Row="0"
+                       Grid.Column="0"
+                       Margin="0,0,0,6"
+                       Style="{StaticResource SubtitleTextBlockStyle}"/>
+            <TextBox Text="{x:Bind ViewModel.ConnectionString, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Header="Connection string"
+                     Width="400"
+                     Margin="6"/>
+            <Button x:Name="SaveAdminButton"
+                    Content="Spremi izmjene"
+                    Click="{x:Bind ViewModel.Save}"
+                    IsEnabled="{x:Bind ViewModel.Changed, Mode=OneWay}"/>
+        </StackPanel>
+    </RelativePanel>
+</Page>

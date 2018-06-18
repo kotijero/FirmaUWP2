@@ -3,6 +3,7 @@ using Firma.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -75,50 +76,65 @@ namespace Firma.DAL
 
         public Artikl AddItem(Artikl item)
         {
-            // TODO: SLIKA!
-            string query = String.Format(@"INSERT INTO Artikl (NazArtikla, JedMjere, CijArtikla, ZastUsluga, TekstArtikla)
-                                            OUTPUT Inserted.SifArtikla
-                                            VALUES ('{0}', '{1}', {2}, {3}, '{4}')",
-                                            item.NazArtikla,
-                                            item.JedMjere,
-                                            item.CijArtikla,
-                                            item.ZastUsluga ? 1 : 0,
-                                            item.TekstArtikla);
-            var result = QueryExecutor.ExecuteQuery(query);
+            string query = @"INSERT INTO Artikl (NazArtikla, JedMjere, CijArtikla, ZastUsluga, SlikaArtikla, TekstArtikla)
+                                  OUTPUT Inserted.SifArtikla
+                                  VALUES (@NazArtikla, @JedMjere, @CijArtikla, @ZastUsluga, @SlikaArtikla, @TekstArtikla)";
+            List<SqlParameter> sqlParameters = new List<SqlParameter>
+            {
+                new SqlParameter("@NazArtikla", item.NazArtikla),
+                new SqlParameter("@JedMjere", item.JedMjere),
+                new SqlParameter("@CijArtikla", item.CijArtikla),
+                new SqlParameter("@ZastUsluga", item.ZastUsluga),
+                new SqlParameter("@SlikaArtikla", SqlDbType.VarBinary)
+                {
+                    Direction = ParameterDirection.Input,
+                    Size = item.SlikaArtikla.Length,
+                    Value = item.SlikaArtikla
+                },
+                new SqlParameter("@TekstArtikla", item.TekstArtikla)
+            };
+            var result = QueryExecutor.ExecuteQuery(query, sqlParameters);
             item.SifArtikla = (int)result.Rows[0].ItemArray[0];
             return item;
         }
 
-        public void UpdateItem(Artikl item)
+        public Artikl UpdateItem(Artikl item)
         {
-            string query = String.Format(@"UPDATE Artikl
-                                              SET NazArtikla = '{0}',
-                                                  JedMjere = '{1}',
-                                                  CijArtikla = {2},
-                                                  ZastUsluga = {3},
-                                                  TekstArtikla = '{4}'
-                                            WHERE SifArtikla = {5}",
-                                                     item.NazArtikla,
-                                                     item.JedMjere,
-                                                     item.CijArtikla,
-                                                     item.ZastUsluga ? 1 : 0,
-                                                     item.TekstArtikla,
-                                                     item.SifArtikla);
-            QueryExecutor.ExecuteNonQuery(query);
+            string query = @"UPDATE Artikl
+                                SET NazArtikla = @NazArtikla,
+                                    JedMjere = @JedMjere,
+                                    CijArtikla = @CijArtikla,
+                                    ZastUsluga = @ZastUsluga,
+                                    SlikaArtikla = @SlikaArtikla,
+                                    TekstArtikla = @TekstArtikla
+                              WHERE SifArtikla = @SifArtikla";
+
+            List<SqlParameter> sqlParameters = new List<SqlParameter>();
+
+            sqlParameters.Add(new SqlParameter("@NazArtikla", item.NazArtikla));
+            sqlParameters.Add(new SqlParameter("@JedMjere", item.JedMjere));
+            sqlParameters.Add(new SqlParameter("@CijArtikla", item.CijArtikla));
+            sqlParameters.Add(new SqlParameter("@ZastUsluga", item.ZastUsluga));
+            sqlParameters.Add(new SqlParameter("@SlikaArtikla", SqlDbType.VarBinary)
+            {
+                Direction = ParameterDirection.Input,
+                Size = item.SlikaArtikla.Length,
+                Value = item.SlikaArtikla
+            });
+            sqlParameters.Add(new SqlParameter("@TekstArtikla", item.TekstArtikla));
+            sqlParameters.Add(new SqlParameter("@SifArtikla", item.SifArtikla));
+
+            QueryExecutor.ExecuteNonQuery(query, sqlParameters);
+            return item;
         }
 
-        public string DeleteItem(Artikl item)
+        public bool DeleteItem(Artikl item)
         {
-            string query = $"SELECT COUNT(*) FROM Stavka WHERE SifArtikla = {item.SifArtikla}";
-            var res = QueryExecutor.ExecuteQuery(query);
-            if ((int)(res.Rows)[0][0] > 0)
-                return "Nije moguće obrisati artikl jer baza sadrži stavke sa ovim artiklom!";
-
-            query = String.Format(@"DELETE FROM Artikl WHERE SifArtikla = {0}", item.SifArtikla);
+            string query = String.Format(@"DELETE FROM Artikl WHERE SifArtikla = {0}", item.SifArtikla);
             if (QueryExecutor.ExecuteNonQuery(query) < 1)
-                return "Nije moguće obrisati!";
+                return false;
 
-            return string.Empty;
+            return true;
         }
 
         public List<LookupModel> FetchLookup()

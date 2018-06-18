@@ -30,47 +30,39 @@ namespace Firma.DAL
                     IdPartnera = (int)row[nameof(dokument.IdPartnera)],
                     IdPrethDokumenta = (int)row[nameof(dokument.IdPartnera)],
                     PostoPorez = (decimal)row[nameof(dokument.PostoPorez)],
-                    IznosDokumenta = (decimal)row[nameof(dokument.PostoPorez)],
-                    Stavke = new List<Stavka>()
+                    IznosDokumenta = (decimal)row[nameof(dokument.PostoPorez)]
                 };
-                
-                // preskociti? fetchati samo lookup i ubaciti u model jedan referentni lookup property
-                if (dokument.IdPrethDokumenta != null)
-                {
-                    query = $"SELECT * FROM Dokument WHERE IdDokumenta = {dokument.IdPrethDokumenta.Value}";
-                }
-
-                string stavkeQuery = $@"SELECT IdStavke
-                                            , IdDokumenta
-                                            , Savka.SifArtikla
-                                            , KolArtikla
-                                            , JedCijArtikla
-                                            , PostoRabat
-                                            , NazArtikla
-                                            , JedMjere
-                                         FROM Stavka JOIN Artikl ON Stavka.SifArtikla = Artikl.SifArtkla
-                                        WHERE IdDokumenta = {Id}";
-                result = QueryExecutor.ExecuteQuery(stavkeQuery);
-                foreach(DataRow stRow in result.Rows)
-                {
-                    Stavka stavka = new Stavka
-                    {
-                        IdStavke = (int)row[nameof(Stavka.IdStavke)],
-                        IdDokumenta = (int)row[nameof(Stavka.IdDokumenta)],
-                        SifArtikla = (int)row[nameof(Stavka.SifArtikla)],
-                        KolArtikla = (int)row[nameof(Stavka.KolArtikla)],
-                        JedCijArtikla = (decimal)row[nameof(Stavka.JedCijArtikla)],
-                        PostoRabat = (decimal)row[nameof(Stavka.PostoRabat)],
-                        Artikl = new Artikl
-                        {
-                            SifArtikla = (int)row[nameof(Artikl.SifArtikla)],
-                            NazArtikla = (string)row[nameof(Artikl.SifArtikla)],
-                            JedMjere = (string)row[nameof(Artikl.SifArtikla)]
-                        }
-                    };
-                    dokument.Stavke.Add(stavka);
-                }
                 return dokument;
+            }
+        }
+
+        public List<Dokument> FetchDokumentsWithIdPrethDokumenta(int idPrethDokumenta)
+        {
+            string query = $"SELECT * FROM Dokument WHERE IdPrethDokumenta = {idPrethDokumenta}";
+            DataTable result = QueryExecutor.ExecuteQuery(query);
+            if (result.Rows.Count < 1)
+            {
+                return null;
+            }
+            else
+            {
+                List<Dokument> dokumentList = new List<Dokument>();
+                foreach(DataRow row in result.Rows)
+                {
+                    dokumentList.Add(new Dokument
+                    {
+                        IdDokumenta = (int)row[nameof(Dokument.IdDokumenta)],
+                        VrDokumenta = (string)row[nameof(Dokument.VrDokumenta)],
+                        BrDokumenta = (int)row[nameof(Dokument.BrDokumenta)],
+                        DatDokumenta = (DateTime)row[nameof(Dokument.DatDokumenta)],
+                        IdPartnera = (int)row[nameof(Dokument.IdPartnera)],
+                        IdPrethDokumenta = (int)row[nameof(Dokument.IdPartnera)],
+                        PostoPorez = (decimal)row[nameof(Dokument.PostoPorez)],
+                        IznosDokumenta = (decimal)row[nameof(Dokument.PostoPorez)]
+                    });
+                }
+                
+                return dokumentList;
             }
         }
 
@@ -84,42 +76,6 @@ namespace Firma.DAL
             }
             else
             {
-                // Priprema - stavke:
-                query = @"SELECT IdStavke
-                               , IdDokumenta
-                               , Stavka.SifArtikla
-                               , KolArtikla
-                               , JedCijArtikla
-                               , PostoRabat
-                               , NazArtikla
-                               , JedMjere
-                            FROM Stavka JOIN Artikl ON Stavka.SifArtikla = Artikl.SifArtikla";
-                DataTable stavkeResult = QueryExecutor.ExecuteQuery(query);
-                List<Stavka> stavkaList = new List<Stavka>();
-                foreach(DataRow row in stavkeResult.Rows)
-                {
-                    Stavka stavka = new Stavka
-                    {
-                        IdStavke = (int)row[nameof(Stavka.IdStavke)],
-                        IdDokumenta = (int)row[nameof(Stavka.IdDokumenta)],
-                        SifArtikla = (int)row[nameof(Stavka.SifArtikla)],
-                        KolArtikla = (decimal)row[nameof(Stavka.KolArtikla)],
-                        JedCijArtikla = (decimal)row[nameof(Stavka.JedCijArtikla)],
-                        PostoRabat = (decimal)row[nameof(Stavka.PostoRabat)],
-                        Artikl = new Artikl
-                        {
-                            SifArtikla = (int)row[nameof(Artikl.SifArtikla)],
-                            NazArtikla = (string)row[nameof(Artikl.NazArtikla)],
-                            JedMjere = (string)row[nameof(Artikl.JedMjere)]
-                        }
-                    };
-                    stavkaList.Add(stavka);
-                }
-
-                // Priprema - Partneri:
-                PartnerDalProvider partnerDalProvider = new PartnerDalProvider();
-                List<Partner> partnerList = partnerDalProvider.FetchAll();
-
                 // Dokument:
                 List<Dokument> dokumentList = new List<Dokument>();
                 foreach(DataRow row in documentResult.Rows)
@@ -135,18 +91,7 @@ namespace Firma.DAL
                         PostoPorez = (decimal)row[nameof(Dokument.PostoPorez)],
                         IznosDokumenta = (decimal)row[nameof(Dokument.IznosDokumenta)]
                     };
-                    dokument.Stavke = stavkaList.Where(t => t.IdDokumenta == dokument.IdDokumenta).ToList();
-                    dokument.Partner = partnerList.Where(t => t.IdPartnera == dokument.IdPartnera).FirstOrDefault();
                     dokumentList.Add(dokument);
-                }
-
-                // PrethDokument:
-                foreach(Dokument dokument in dokumentList)
-                {
-                    if (dokument.IdPrethDokumenta != null)
-                    {
-                        dokument.PrethodniDokument = dokumentList.Where(t => t.IdDokumenta == dokument.IdPrethDokumenta).FirstOrDefault();
-                    }
                 }
                 return dokumentList;
             }
@@ -165,15 +110,6 @@ namespace Firma.DAL
                                             item.IznosDokumenta);
             int result = (int)QueryExecutor.ExecuteQuery(query).Rows[0].ItemArray[0];
             item.IdDokumenta = result;
-
-            foreach (Stavka stavka in item.Stavke)
-            {
-                stavka.IdDokumenta = result;
-                query = String.Format(@"INSERT INTO Stavka (IdDokumenta, SifArtikla, KolArtikla, JedCijArtikla, PostoRabat)
-                                         OUTPUT inserted.IdStavke VALUES ({0}, {1}, {2}, {3}, {4})",
-                                                    stavka.IdDokumenta, stavka.SifArtikla, stavka.KolArtikla, stavka.JedCijArtikla, stavka.PostoRabat);
-                stavka.IdStavke = (int)QueryExecutor.ExecuteQuery(query).Rows[0][0];
-            }
             return item;
         }
 
@@ -220,40 +156,36 @@ namespace Firma.DAL
                                             item.IdDokumenta);
                 QueryExecutor.ExecuteNonQuery(query);
             }
-            foreach (Stavka stavka in item.Stavke)
-            {
-                query = String.Format(@"UPDATE Stavka
-                                           SET IdDokumenta = {0},
-                                               SifArtikla = {1},
-                                               KolArtikla = {2},
-                                               JedCijArtikla = {3},
-                                               PostoRabat = {4}
-                                         WHERE IdStavke = {5}",
-                                         stavka.IdDokumenta,
-                                         stavka.SifArtikla,
-                                         stavka.KolArtikla,
-                                         stavka.JedCijArtikla,
-                                         stavka.PostoRabat,
-                                         stavka.IdStavke);
-                QueryExecutor.ExecuteNonQuery(query);
-            }
         }
 
         public string DeleteItem(Dokument dokument)
         {
-            string query = $"SELECT COUNT(*) FROM Dokument WHERE IdPrethDokumenta = {dokument.IdDokumenta}";
-            var res = QueryExecutor.ExecuteQuery(query);
-            if ((int)(res.Rows)[0][0] > 0)
-            {
-                return "Nije moguće obrisati dokument jer u bazi postoje dokumenti koji se referenciraju na ovaj dokument!";
-            }
-
-            query = String.Format("DELETE FROM Stavka WHERE IdDokumenta = {0}", dokument.IdDokumenta);
-            QueryExecutor.ExecuteNonQuery(query);
-            query = String.Format("DELETE FROM Dokument WHERE IdDokumenta = {0}", dokument.IdDokumenta);
+            string query = String.Format("DELETE FROM Dokument WHERE IdDokumenta = {0}", dokument.IdDokumenta);
             QueryExecutor.ExecuteNonQuery(query);
 
             return string.Empty;
+        }
+
+        public bool CheckDokumentForMjesto(int idMjesta)
+        {
+            string query = "SELECT COUNT(*) FROM Dokument WHERE IdMjestaPartnera = @IdMjesta OR IdMjestaIsporuke = @IdMjesta";
+            var result = QueryExecutor.ExecuteQuery(query, new List<System.Data.SqlClient.SqlParameter> { new System.Data.SqlClient.SqlParameter("@IdMjesta", idMjesta) });
+            if (result != null)
+            {
+                return (int)(result.Rows[0])[0] > 0;
+            }
+            else return false;
+        }
+
+        public bool CheckDokumentForPartner(int idPartnera)
+        {
+            string query = "SELECT COUNT(*) FROM Dokument WHERE IdPartnera = @IdPartnera";
+            var result = QueryExecutor.ExecuteQuery(query, new List<System.Data.SqlClient.SqlParameter> { new System.Data.SqlClient.SqlParameter("@IdPartnera", idPartnera) });
+            if (result != null)
+            {
+                return (int)(result.Rows[0])[0] > 0;
+            }
+            else return true;
         }
     }
 }

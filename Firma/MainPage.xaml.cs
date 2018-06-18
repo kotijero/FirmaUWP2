@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using ViewModel;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -22,8 +23,11 @@ namespace Firma
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        private MainPageViewModel ViewModel;
+
         public MainPage()
         {
+            ViewModel = new MainPageViewModel();
             this.InitializeComponent();
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
         }
@@ -45,6 +49,10 @@ namespace Firma
             {
                 Windows.UI.Core.SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.Collapsed;
             }
+            if (ViewModel.SignedIn == false)
+            {
+                Login();
+            }
         }
 
         private void PartnerButton_Click(object sender, RoutedEventArgs e)
@@ -61,5 +69,46 @@ namespace Firma
         {
             this.Frame.Navigate(typeof(Views.DokumentDetails));
         }
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Views.SettingsPage), ViewModel.Korisnik);
+        }
+
+        private void DrzavaButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private async void Login()
+        {
+            CustomControls.SignInContentDialog signInContentDialog = new CustomControls.SignInContentDialog();
+            var result = await signInContentDialog.ShowAsync();
+            if (signInContentDialog.ViewModel.Korisnik == null)
+            {
+                CloseApp();
+            } else
+            {
+                ViewModel.Korisnik = signInContentDialog.ViewModel.Korisnik;
+                ViewModel.SignedIn = true;
+            }
+        }
+
+        public void CloseApp()
+        {
+            Application.Current.Exit();
+
+        }
+
+        private void LoginButton_Click(object sender, RoutedEventArgs e)
+        {
+            Login();
+        }
+
+        private void KorisniciButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Views.KorisniciList), ViewModel.Korisnik);
+        }
+        
     }
 }

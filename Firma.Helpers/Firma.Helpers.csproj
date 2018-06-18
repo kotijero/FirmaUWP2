@@ -108,9 +108,12 @@
   <ItemGroup>
     <Compile Include="Constants.cs" />
     <Compile Include="Defaults.cs" />
+    <Compile Include="ListableModel.cs" />
     <Compile Include="LookupModel.cs" />
     <Compile Include="ObservableModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
+    <Compile Include="ValidationModelBase.cs" />
     <EmbeddedResource Include="Properties\Firma.Helpers.rd.xml" />
   </ItemGroup>
   <ItemGroup>

@@ -6,10 +6,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:helper="using:Firma.Converters"
+    xmlns:custom="using:Firma.CustomControls"
     mc:Ignorable="d">
     <Page.Resources>
         <helper:DecimalToStringConverter x:Key="DecimalToStringConverter"/>
         <helper:TrueToVisibleConverter x:Key="TrueToVisibleConverter"/>
+        <helper:ToListableModelConverter x:Key="ToListableModelConverter"/>
     </Page.Resources>
 
     <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -18,72 +20,28 @@
                 RelativePanel.AlignTopWithPanel="True"
                 RelativePanel.AlignLeftWithPanel="True"
                 Click="BackButton_Click"/>
+        <SymbolIcon Name="PanelSymbol"
+                    Symbol="Shop"
+                    RelativePanel.RightOf="BackButton"
+                    Margin="7,13,0,24"/>
         <TextBlock x:Name="NaslovTextBlock"
-                   Text="Pregled artikala"
+                   Text="Artikli"
                    Style="{StaticResource TitleTextBlockStyle}"
-                   Margin="7,7,0,24"
-                   RelativePanel.RightOf="BackButton"/>
-        <StackPanel Name="NavigationStackPanel"
-                    Orientation="Horizontal"
-                    RelativePanel.RightOf="NaslovTextBlock"
-                    Margin="15,8">
-            <Button Name="PreviousButton"
-                    Content="Prethodni"
-                    IsEnabled="{x:Bind ViewModel.IsNotFirst, Mode=OneWay}"
-                    Click="{x:Bind ViewModel.Previous}"/>
-            <TextBox Name="PositionTextBox"
-                     Width="10"
-                     IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
-                     Text="{x:Bind ViewModel.CurrentPosition, Mode=TwoWay}"
-                     InputScope="Number"/>
-            <TextBlock Text="/"
-                       Margin="3,5"/>
-            <TextBlock Name="TotalCountTextBlock"
-                       Margin="0,5,4,0"
-                       Text="{x:Bind ViewModel.ItemsCount, Mode=OneWay}"/>
-            <Button Name="NextButton"
-                    Content="Slijedeći"
-                    IsEnabled="{x:Bind ViewModel.IsNotLast, Mode=OneWay}"
-                    Click="{x:Bind ViewModel.Next}"/>
-        </StackPanel>
-        <CommandBar Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                    RelativePanel.AlignRightWithPanel="True"
-                    RelativePanel.AlignTopWithPanel="True"
-                    OverflowButtonVisibility="Auto"
-                    DefaultLabelPosition="Right">
-            <AppBarButton Name="SaveButton"
-                          Label="Spremi"
-                          Icon="Save"
-                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                          Click="{x:Bind ViewModel.Save}"
-                          Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-            <AppBarButton Name="CancelButton"
-                          Label="Odustani"
-                          Icon="Cancel"
-                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                          Click="{x:Bind ViewModel.Cancel}"
-                          Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-            <AppBarButton Name="EditButton"
-                          Label="Izmjeni"
-                          Icon="Edit"
-                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
-                          Click="{x:Bind ViewModel.Edit}"
-                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-            <AppBarButton Name="DeleteButton"
-                          Label="Izbriši"
-                          Icon="Delete"
-                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
-                          Click="{x:Bind ViewModel.Delete}"
-                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-            <AppBarButton Name="NewButton"
-                          Label="Novi zapis"
-                          Icon="Add"
-                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
-                          Click="{x:Bind ViewModel.New}"
-                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-        </CommandBar>
-        <Grid RelativePanel.Below="NaslovTextBlock"
-              RelativePanel.AlignLeftWithPanel="True">
+                   Margin="6,7,0,24"
+                   RelativePanel.RightOf="PanelSymbol"/>
+        
+        <custom:CrudControlsBar ViewModel="{x:Bind ViewModel.CrudControlsViewModel}"
+                                RelativePanel.AlignRightWithPanel="True"
+                                RelativePanel.AlignTopWithPanel="True"/>
+        <custom:FilteredListView Name="ItemsListView"
+                                 ViewModel="{x:Bind ViewModel.FilteredListViewModel, Converter={StaticResource ToListableModelConverter}}"
+                                 RelativePanel.Below="NaslovTextBlock"
+                                 RelativePanel.AlignLeftWithPanel="True"
+                                 RelativePanel.AlignBottomWithPanel="True"/>
+        <Grid Name="DetailsPanel"
+              RelativePanel.Below="NaslovTextBlock"
+              RelativePanel.RightOf="ItemsListView"
+              Visibility="{x:Bind ViewModel.ShowDetails, Mode=OneWay}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
@@ -102,66 +60,67 @@
                        Margin="10"
                        Grid.Row="0"
                        Grid.Column="0"/>
-            <TextBox Name="SifArtiklaTextBox"
-                     Text="{x:Bind ViewModel.CurrentArtikl.SifArtikla, Mode=TwoWay}"
-                     Width="200"
-                     IsEnabled="False"
-                     Grid.Row="0"
-                     Grid.Column="1"/>
+            <custom:ValidationTextBox AttributeName="SifArtikla"
+                                      Text="{x:Bind ViewModel.CurrentItem.SifArtikla, Mode=TwoWay}"
+                                      ErrorMessage="{x:Bind ViewModel.Errors.SifArtikla, Mode=OneWay}"
+                                      TextChangedAction="{x:Bind ViewModel.ValidatePropertyAction('SifArtikla')}"
+                                      TotalElementWidth="200"
+                                      IsEnabled="False"
+                                      Grid.Row="0"
+                                      Grid.Column="1"/>
             <TextBlock Text="Naziv artikla"
                        Margin="10"
                        Grid.Row="1"
                        Grid.Column="0"/>
-            <TextBox Name="NazArtiklaTextBox"
-                     Width="200"
-                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                     Text="{x:Bind ViewModel.CurrentArtikl.NazArtikla, Mode=TwoWay}"
-                     Grid.Row="1"
-                     Grid.Column="1"/>
+            <custom:ValidationTextBox TotalElementWidth="200"
+                                      AttributeName="NazArtikla"
+                                      Text="{x:Bind ViewModel.CurrentItem.NazArtikla, Mode=TwoWay}"
+                                      ErrorMessage="{x:Bind ViewModel.Errors.NazArtikla, Mode=OneWay}"
+                                      IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                      TextChangedAction="{x:Bind ViewModel.ValidatePropertyAction('NazArtikla')}"
+                                      Grid.Row="1"
+                                      Grid.Column="1"/>
             <TextBlock Text="Jedinica mjere"
                        Margin="10"
                        Grid.Row="2"
                        Grid.Column="0"/>
-            <TextBox Name="JedMjereTextBox"
-                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                     Text="{x:Bind ViewModel.CurrentArtikl.JedMjere, Mode=TwoWay}"
-                     Grid.Row="2"
-                     Grid.Column="1"/>
+            <custom:ValidationTextBox TotalElementWidth="200"
+                                      AttributeName="JedMjere"
+                                      Text="{x:Bind ViewModel.CurrentItem.JedMjere, Mode=TwoWay}"
+                                      ErrorMessage="{x:Bind ViewModel.Errors.JedMjere, Mode=OneWay}"
+                                      IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                      TextChangedAction="{x:Bind ViewModel.ValidatePropertyAction('JedMjere')}"
+                                      Grid.Row="2"
+                                      Grid.Column="1"/>
             <TextBlock Text="Cijena artikla"
                        Margin="10"
                        Grid.Row="3"
                        Grid.Column="0"/>
-            <TextBox Name="CijArtiklaTextBox"
-                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                     InputScope="Number"
-                     Text="{x:Bind ViewModel.CurrentArtikl.CijArtikla, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
-                     Grid.Row="3"
-                     Grid.Column="1"/>
+            <custom:ValidationTextBox TotalElementWidth="200"
+                                      AttributeName="CijArtikla"
+                                      Text="{x:Bind ViewModel.CurrentItem.CijArtikla, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
+                                      ErrorMessage="{x:Bind ViewModel.Errors.CijArtikla, Mode=OneWay}"
+                                      IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                      TextChangedAction="{x:Bind ViewModel.ValidatePropertyAction('CijArtikla')}"
+                                      Grid.Row="3"
+                                      Grid.Column="1"/>
             <TextBlock Text="Usluga"
                        Margin="10"
                        Grid.Row="4"
                        Grid.Column="0"/>
             <CheckBox Name="ZastUslugaCheckBox"
-                      IsChecked="{x:Bind ViewModel.CurrentArtikl.ZastUsluga}"
+                      IsChecked="{x:Bind ViewModel.CurrentItem.ZastUsluga}"
                       IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
                       Grid.Row="4"
                       Grid.Column="1"/>
-            <TextBlock Text="Slika artikla"
-                       Margin="10"
-                       Grid.Row="5"
-                       Grid.Column="0"/>
-            <Image x:Name="SlikaArtiklaImage"
-                   Grid.Row="5"
-                   Grid.Column="1"
-                   Height="300"
-                   Width="200"/>
             <TextBlock Text="Tekst artikla"
                        Margin="10"
                        Grid.Row="6"
                        Grid.Column="0"/>
             <TextBox Name="TekstArtiklaTextBox"
-                     Text="{x:Bind ViewModel.CurrentArtikl.TekstArtikla, Mode=TwoWay}"
+                     Text="{x:Bind ViewModel.CurrentItem.TekstArtikla, Mode=TwoWay}"
                      IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                     BorderBrush="{StaticResource TextBoxBorderThemeBrush}"
                      TextWrapping="Wrap"
                      AcceptsReturn="True"
                      Width="200"
@@ -169,5 +128,36 @@
                      Grid.Row="6"
                      Grid.Column="1"/>
         </Grid>
+        <RelativePanel RelativePanel.RightOf="DetailsPanel"
+                       RelativePanel.AlignTopWith="DetailsPanel"
+                       Margin="12,0,0,0"
+                       Visibility="{x:Bind ViewModel.ShowDetails, Mode=OneWay}">
+            <TextBlock x:Name="SlikaArtiklaTextBlock" Text="Slika artikla:"
+                       Margin="12,6,6,6"
+                       Style="{StaticResource BaseTextBlockStyle}"/>
+            <Border x:Name="SlikaArtiklaBorder"
+                    RelativePanel.Below="SlikaArtiklaTextBlock"
+                    Width="200"
+                    Height="200"
+                    BorderBrush="{StaticResource TextBoxBackgroundThemeBrush}"
+                    BorderThickness="2"
+                    Margin="12,0,0,0">
+                <Image x:Name="SlikaArtiklaImage"
+                       Source="{x:Bind ViewModel.CurrentItem.SlikaArtiklaImage, Mode=OneWay}"/>
+            </Border>
+            <Button x:Name="ChangeImageButton"
+                    Content="Promijeni sliku"
+                    RelativePanel.Below="SlikaArtiklaBorder"
+                    Margin="12,6,6,6"
+                    Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                    Click="{x:Bind ViewModel.ChangeImage}"/>
+            <Button x:Name="RemoveImageButton"
+                    Content="Ukloni sliku"
+                    RelativePanel.Below="SlikaArtiklaBorder"
+                    RelativePanel.RightOf="ChangeImageButton"
+                    Margin="6,6,6,6"
+                    Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                    Click="{x:Bind ViewModel.RemoveImage}"/>
+        </RelativePanel>
     </RelativePanel>
 </Page>

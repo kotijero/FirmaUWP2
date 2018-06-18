@@ -2,14 +2,17 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Storage.Streams;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace Firma.Model
 {
-    public class Artikl : ObservableModel
+    public class Artikl : ListableModel
     {
         #region Constructors
         public Artikl()
@@ -43,6 +46,7 @@ namespace Firma.Model
         private byte[] slikaArtikla;
         private string tekstArtikla;
 
+        private BitmapImage slikaArtiklaImage;
         #endregion
 
         #region Public Properties
@@ -68,6 +72,7 @@ namespace Firma.Model
                 {
                     nazArtikla = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(Title));
                 }
             }
         }
@@ -80,6 +85,7 @@ namespace Firma.Model
                 {
                     jedMjere = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(Subtitle));
                 }
             }
         }
@@ -92,6 +98,7 @@ namespace Firma.Model
                 {
                     cijArtikla = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(Subtitle));
                 }
             }
         }
@@ -112,13 +119,13 @@ namespace Firma.Model
             get { return slikaArtikla; }
             set
             {
-                //if (!slikaArtikla.Equals(value))
-                //{
-
-                //}
+                if (slikaArtikla == null || !slikaArtikla.Equals(value))
+                {
+                    slikaArtikla = value;
+                }
             }
         }
-        public byte[] SlikaArtiklaImage { get; set; }
+        
         public string TekstArtikla
         {
             get { return tekstArtikla; }
@@ -132,36 +139,94 @@ namespace Firma.Model
             }
         }
 
-        #endregion
-
-        #region Validation
-
-        public void Validate(string propertyName)
+        #region Slika Artikla
+        public BitmapImage SlikaArtiklaImage
         {
-            if (propertyName.Equals(nameof(SifArtikla)))
+            get
             {
-
-            } else if (propertyName.Equals(nameof(NazArtikla)))
+                if (slikaArtiklaImage == null)
+                {
+                    SetSlikaArtiklaImageFromByteArray();
+                }
+                return slikaArtiklaImage;
+            }
+            set
             {
+                slikaArtiklaImage = value;
+                OnPropertyChanged();
+            }
+        }
 
-            } else if (propertyName.Equals(nameof(JedMjere)))
+        
+
+        private void SetSlikaArtiklaImageFromByteArray()
+        {
+            if (slikaArtikla != null && slikaArtikla.Length > 0)
             {
-
-            } else if (propertyName.Equals(nameof(CijArtikla)))
+                using (InMemoryRandomAccessStream ms = new InMemoryRandomAccessStream())
+                {
+                    using (DataWriter writer = new DataWriter(ms.GetOutputStreamAt(0)))
+                    {
+                        writer.WriteBytes(slikaArtikla);
+                        writer.StoreAsync().GetResults();
+                    }
+                    if (slikaArtiklaImage == null) slikaArtiklaImage = new BitmapImage();
+                    slikaArtiklaImage.SetSource(ms);
+                }
+            }
+            else
             {
+                using (InMemoryRandomAccessStream ms = new InMemoryRandomAccessStream())
+                {
+                    using (var inputStream = ms.GetOutputStreamAt(0))
+                    using (DataWriter writer = new DataWriter(inputStream))
+                    {
+                        writer.WriteBytes(new byte[0]);
+                        writer.StoreAsync().GetResults();
+                    }
+                    slikaArtiklaImage = new BitmapImage();
+                    SlikaArtiklaImage.SetSource(ms);
+                    OnPropertyChanged(nameof(SlikaArtiklaImage));
+                }
+            }
+        }
 
-            } else if (propertyName.Equals(nameof(ZastUsluga)))
+        public void ResetImageSource()
+        {
+            SetSlikaArtiklaImageFromByteArray();
+        }
+
+        public async void SetSlikaArtiklaFromFile(Windows.Storage.StorageFile file)
+        {
+            if (file == null)
             {
-
-            } else if (propertyName.Equals(nameof(TekstArtikla)))
+                SlikaArtikla = new byte[0];
+                SetSlikaArtiklaImageFromByteArray();
+            }
+            else
             {
-
+                // set byte[]
+                using (var inputStream = await file.OpenSequentialReadAsync())
+                {
+                    var readStream = inputStream.AsStreamForRead();
+                    SlikaArtikla = new byte[readStream.Length];
+                    await readStream.ReadAsync(SlikaArtikla, 0, SlikaArtikla.Length);
+                }
+                // set BitmapImage
+                SetSlikaArtiklaImageFromByteArray();
             }
         }
 
         #endregion
+        #endregion
 
         #region DTO
+
+        public override string Title => nazArtikla;
+
+        public override string Subtitle => $"{CijArtikla.ToString("N")} kn/{JedMjere}";
+
+        public override string Subsubtitle => string.Empty;
 
         public DTO.Artikl ToDTO()
         {

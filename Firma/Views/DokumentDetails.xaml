@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:Firma.Converters"
-    xmlns:model="using:Firma.Model"
+    xmlns:custom="using:Firma.CustomControls"
+    xmlns:viewmodel="using:ViewModel.DomainViewModels"
     mc:Ignorable="d">
     <Page.Resources>
         <converters:OsobaToTrueConverter x:Key="OsobaToTrueConverter"/>
@@ -17,6 +18,9 @@
         <converters:FalseToVisibleConverter x:Key="FalseToVisibleConverter"/>
         <converters:DateTimeToDateTimeOffsetConverter x:Key="DateTimeToDateTimeOffsetConverter"/>
         <converters:DecimalToStringConverter x:Key="DecimalToStringConverter"/>
+        <converters:StringContentToVisibleConverter x:Key="StringContentToVisibleConverter"/>
+        <converters:ToListableModelConverter x:Key="ToListableModelConverter"/>
+        <converters:EditModeToWidthConverter x:Key="EditModeToWidthConverter" EditModeWidth="250" NotInEditModeWidth="300"/>
         <Style TargetType="ListView" x:Key="FixedHeaderListViewStyle">
             <Setter Property="IsTabStop" Value="False"/>
             <Setter Property="TabNavigation" Value="Once"/>
@@ -83,7 +87,7 @@
                                                     Padding="{TemplateBinding Padding}"/>
                                 </ScrollViewer>
                             </Grid>
-                            
+
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -98,256 +102,182 @@
                 RelativePanel.AlignLeftWithPanel="True"
                 Click="BackButton_Click"
                 IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"/>
+        <SymbolIcon Name="PanelSymbol"
+                    Symbol="Document"
+                    RelativePanel.RightOf="BackButton"
+                    Margin="7,13,0,7"/>
         <TextBlock Name="TitleTextBlock"
                    Text="Dokumenti"
-                   Margin="7"
-                   RelativePanel.RightOf="BackButton"
+                   Margin="7,7,0,7"
+                   RelativePanel.RightOf="PanelSymbol"
                    Style="{StaticResource TitleTextBlockStyle}"/>
-        <CommandBar Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-                    RelativePanel.AlignRightWithPanel="True"
-                    RelativePanel.AlignTopWithPanel="True"
-                    DefaultLabelPosition="Right">
-            <AppBarButton Name="SaveButton"
-                          Label="Spremi"
-                          Icon="Save"
-                          Click="{x:Bind ViewModel.Save}"
-                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                          Visibility="{x:Bind ViewModel.InEditMode,Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-            <AppBarButton Name="CancelButton"
-                          Label="Odustani"
-                          Icon="Cancel"
-                          Click="{x:Bind ViewModel.Cancel}"
-                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                          Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-            <AppBarButton Name="EditButton"
-                          Label="Izmjeni"
-                          Icon="Edit"
-                          Click="{x:Bind ViewModel.Edit}"
-                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
-                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-            <AppBarButton Name="DeleteButton"
-                          Label="Izbriši"
-                          Icon="Delete"
-                          Click="{x:Bind ViewModel.Delete}"
-                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
-                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-            <AppBarButton Name="NewButton"
-                          Label="Dodaj novi"
-                          Icon="Add"
-                          Click="{x:Bind ViewModel.New}"
-                          IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"
-                          Visibility="{x:Bind ViewModel.NotInEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-        </CommandBar>
-        <RelativePanel Name="DokumentList"
-                       Margin="0,0,0,0"
-                       RelativePanel.AlignBottomWithPanel="True"
-                       RelativePanel.AlignLeftWithPanel="True"
-                       RelativePanel.Below="TitleTextBlock">
-            <AutoSuggestBox Name="SearchABox"
-                            PlaceholderText="Pretraga"
-                            QueryIcon="Find"
-                            Margin="10"
-                            MinWidth="200"
-                            TextChanged="SearchABox_TextChanged"
-                            IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}"/>
-            <ProgressRing x:Name="LoadingIndicator"
-                          Margin="24,0,0,24"
-                          RelativePanel.Below="SearchABox"
-                          IsActive="{x:Bind ViewModel.Loading, Mode=OneWay}"/>
-            <ListView Name="DokumentListView"
-                      RelativePanel.Below="SearchABox"
-                      RelativePanel.AlignBottomWithPanel="True"
-                      Margin="10"
-                      ItemsSource="{x:Bind ViewModel.FilteredDokumentList}"
-                      ScrollViewer.VerticalScrollBarVisibility="Auto"
-                      SelectedIndex="{x:Bind ViewModel.CurrentPosition, Mode=TwoWay}"
-                      IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <RelativePanel MinWidth="200">
-                            <TextBlock Name="BrDokumentaTB"
-                                       Padding="5,0,5,0"
-                                       Text="{Binding BrDokumenta}"
-                                       Style="{StaticResource BodyTextBlockStyle}"/>
-                            <TextBlock Name="LeftBracketTB"
-                                       RelativePanel.RightOf="BrDokumentaTB"
-                                       Padding="5,0,0,0"
-                                       Text="("
-                                       Style="{StaticResource BodyTextBlockStyle}"/>
-                            <TextBlock Name="VrDokumentaTB"
-                                       RelativePanel.RightOf="LeftBracketTB"
-                                       Text="{Binding VrDokumenta}"
-                                       Style="{StaticResource BodyTextBlockStyle}"/>
-                            <TextBlock Name="RightBracketTB"
-                                       RelativePanel.RightOf="VrDokumentaTB"
-                                       Text=")"
-                                       Style="{StaticResource BodyTextBlockStyle}"/>
-                            <TextBlock Name="PartnerTB"
-                                       RelativePanel.Below="BrDokumentaTB"
-                                       Padding="5,0,5,0"
-                                       Text="{Binding PartnerLookup.Value}"
-                                       Margin="5,0,0,0"
-                                       Style="{StaticResource CaptionTextBlockStyle}"/>
-                            <TextBlock Name="IznosTB"
-                                       RelativePanel.Below="PartnerTB"
-                                       Padding="5,0,5,0"
-                                       Text="{Binding IznosDokumenta, Converter={StaticResource DecimalToStringConverter}}"
-                                       Margin="5,0,0,0"
-                                       Style="{StaticResource CaptionTextBlockStyle}"/>
-                            <TextBlock Name="KnTB"
-                                       Text="kn"
-                                       RelativePanel.RightOf="IznosTB"
-                                       RelativePanel.AlignTopWith="IznosTB"
-                                       Padding="1,0,0,0"
-                                       Style="{StaticResource CaptionTextBlockStyle}"/>
-                        </RelativePanel>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </RelativePanel>
+        <custom:CrudControlsBar ViewModel="{x:Bind ViewModel.CrudControlsViewModel}"
+                                RelativePanel.AlignTopWithPanel="True"
+                                RelativePanel.AlignRightWithPanel="True"/>
+        <custom:FilteredListView Name="ItemListView" ViewModel="{x:Bind ViewModel.FilteredListViewModel, Converter={StaticResource ToListableModelConverter}}"
+                                 RelativePanel.Below="TitleTextBlock"
+                                 RelativePanel.AlignLeftWithPanel="True"
+                                 RelativePanel.AlignBottomWithPanel="True"/>
         <RelativePanel Name="DetailsSP"
-                    RelativePanel.RightOf="DokumentList"
-                    RelativePanel.AlignTopWith="DokumentList"
+                    RelativePanel.RightOf="ItemListView"
+                    RelativePanel.AlignTopWith="ItemListView"
                     RelativePanel.AlignBottomWithPanel="True"
                     Margin="10"
-                    Visibility="{x:Bind ViewModel.ShowDetails, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}">
+                       x:Load="{x:Bind ViewModel.ShowDetails, Mode=OneWay}"
+                    >
             <TextBlock Name="NewDocumentTitle"
                 Text="Novi dokument"
                        Margin="5"
                        Style="{StaticResource TitleTextBlockStyle}"
                        Visibility="{x:Bind ViewModel.IsNewItem, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-            <Grid Name="DetailsGrid"
+            <Grid Name="DetailsGrid2"
                   RelativePanel.Below="NewDocumentTitle"
                   Margin="24,8,8,8">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="130"/>
-                    <ColumnDefinition Width="350"/>
-                    <ColumnDefinition Width="80"/>
-                    <ColumnDefinition/>
-                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
+                    <RowDefinition/>
                 </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="120"/>
+                    <ColumnDefinition Width="300"/>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="300"/>
+                </Grid.ColumnDefinitions>
                 <TextBlock Text="ID dokumenta"
-                           Margin="0,5,0,0"
                            Grid.Row="0"
-                           Grid.Column="0"/>
-                <Grid Grid.Row="0"
-                      Grid.Column="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"></RowDefinition>
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox Name="IdDokumentaTextBox"
-                             Text="{x:Bind ViewModel.CurrentDokument.IdDokumenta, Mode=OneWay}"
-                             Grid.Row="0"
-                             Grid.Column="0"
-                             HorizontalAlignment="Left"
-                             Width="100"
-                             IsEnabled="False"/>
-                    <TextBlock Name="VrstaTextBlock"
-                               Text="Vrsta"
-                               Grid.Row="0"
-                               Grid.Column="1"
-                               HorizontalAlignment="Right"
-                               Margin="0,5,8,0"/>
-                    <TextBox Name="VrstaTextBox"
-                             Text="{x:Bind ViewModel.CurrentDokument.VrDokumenta, Mode=TwoWay}"
-                             Grid.Row="0"
-                             Grid.Column="2"
-                             HorizontalAlignment="Left"
-                             IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
-                    <TextBlock Text="Broj"
-                               Grid.Row="0"
-                               Grid.Column="3"
-                               HorizontalAlignment="Right"
-                               Margin="0,5,8,0"/>
-                    <TextBox Name="BrDokumentaTextBox"
-                             Text="{x:Bind ViewModel.CurrentDokument.BrDokumenta, Mode=TwoWay}"
-                             Grid.Row="0"
-                             Grid.Column="4"
-                             IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
-                </Grid>
-                <TextBlock Name="DatumTextBlock"
-                           Text="Datum"
+                           Grid.Column="0"
+                           Margin="6"/>
+                <custom:ValidationTextBox Text="{x:Bind ViewModel.CurrentItem.IdDokumenta, Mode=OneWay}"
+                                          IsEnabled="False"
+                                          Grid.Row="0"
+                                          Grid.Column="1"
+                                          TotalElementWidth="300"/>
+                <TextBlock Text="Vrsta"
+                           Grid.Row="0"
                            Grid.Column="2"
-                           Grid.Row="0"
-                           Margin="10,5,10,0"/>
-                <DatePicker Name="DatumDatePicker"
-                            Date="{x:Bind ViewModel.CurrentDokument.DatDokumenta, Converter={StaticResource DateTimeToDateTimeOffsetConverter}, Mode=TwoWay}"
-                            Grid.Column="3"
-                            Grid.Row="0"
-                            Width="300"
-                            IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
-                <TextBlock Name="PartnerTextBlock"
-                           Text="Partner"
+                           Margin="6"/>
+                <custom:ValidationTextBox Text="{x:Bind ViewModel.CurrentItem.VrDokumenta, Mode=TwoWay}"
+                                          ErrorMessage="{x:Bind ViewModel.Errors.VrDokumenta, Mode=OneWay}"
+                                          TextChangedAction="{x:Bind ViewModel.ValidatePropertyAction('VrDokumenta')}"
+                                          TotalElementWidth="300"
+                                          Grid.Row="0"
+                                          Grid.Column="3"
+                                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                <TextBlock Text="Prethodni dok."
                            Grid.Row="1"
                            Grid.Column="0"
-                           Margin="0,5,0,0"/>
-                <ComboBox Name="PartnerComboBox"
-                          Grid.Row="1"
-                          Grid.Column="1"
-                          Width="350"
-                          ItemsSource="{x:Bind ViewModel.PartnerLookupList, Mode=OneWay}"
-                          DisplayMemberPath="Value"
-                          SelectedItem="{x:Bind ViewModel.CurrentDokument.PartnerLookup, Mode=TwoWay}"
-                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
-                <TextBlock Name="PorezTextBlock"
-                           Text="Porez"
+                           Margin="6"/>
+                <RelativePanel Grid.Row="1"
+                               Grid.Column="1"
+                               Width="300">
+                    <Button Name="EditPrethodniDokument"
+                            Width="50"
+                            Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                            RelativePanel.AlignRightWithPanel="True"
+                            Click="EditPrethodniDokument_Click"
+                            ToolTipService.ToolTip="Izmjeni prethodni dokument">
+                        <SymbolIcon Symbol="Edit"/>
+                    </Button>
+                    <Border BorderBrush="{StaticResource TextBoxDisabledBorderThemeBrush}"
+                            BorderThickness="2"
+                            RelativePanel.AlignLeftWithPanel="True"
+                            RelativePanel.LeftOf="EditPrethodniDokument"
+                            RelativePanel.AlignBottomWithPanel="True"
+                            RelativePanel.AlignTopWithPanel="True" 
+                            HorizontalAlignment="Center" 
+                            Margin="0,0,0,0" 
+                            VerticalAlignment="Center" 
+                            Height="33"
+                            MinWidth="250"
+                            Width="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource EditModeToWidthConverter}}">
+                        <TextBlock Text="{x:Bind ViewModel.CurrentItem.PrethodniDokumentLookup.Value, Mode=OneWay}"
+                                   VerticalAlignment="Center"
+                                   Margin="3"/>
+                    </Border>
+                </RelativePanel>
+                <TextBlock Text="Broj"
                            Grid.Row="1"
                            Grid.Column="2"
-                           Margin="10,5,10,0"/>
-                <TextBox Name="PorezTextBox"
-                         Text="{x:Bind ViewModel.CurrentDokument.PostoPorez, Mode=TwoWay}"
-                         Grid.Column="3"
-                         Grid.Row="1"
-                         IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
-                <TextBlock Name="PrethodniTextBlock"
-                           Text="Prethodni dok."
+                           Margin="6"/>
+                <custom:ValidationTextBox Text="{x:Bind ViewModel.CurrentItem.BrDokumenta, Mode=TwoWay}"
+                                          ErrorMessage="{x:Bind ViewModel.Errors.BrDokumenta, Mode=OneWay}"
+                                          TextChangedAction="{x:Bind ViewModel.ValidatePropertyAction('BrDokumenta')}"
+                                          TotalElementWidth="300"
+                                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                          Grid.Row="1"
+                                          Grid.Column="3"/>
+                <TextBlock Text="Partner"
                            Grid.Row="2"
                            Grid.Column="0"
-                           Margin="0,5,0,0"/>
-                <ComboBox Name="PrethodniComboBox"
-                      Grid.Row="2"
-                      Grid.Column="1"
-                      Width="350"
-                      ItemsSource="{x:Bind ViewModel.DokumentLookupList, Mode=OneWay}"
-                      DisplayMemberPath="Value"
-                      SelectedItem="{x:Bind ViewModel.CurrentDokument.PrethodniDokumentLookup, Mode=TwoWay}"
-                      IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
-                <TextBlock Name="IznosTextBlock"
-                       Text="Iznos"
-                       Grid.Row="2"
-                       Grid.Column="2"
-                       Margin="10,5,10,0"/>
-                <TextBox Name="IznosTextBox"
-                     Text="{x:Bind ViewModel.CurrentDokument.IznosDokumenta, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
-                     Grid.Row="2"
-                     Grid.Column="3"
-                     IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                           Margin="6"/>
+                <RelativePanel Grid.Row="2"
+                               Grid.Column="1">
+                    <AutoSuggestBox Text="{x:Bind ViewModel.PartnerAutoSuggestText, Mode=TwoWay}" 
+                                    Name="PartnerAutoSuggestBox"
+                                    PlaceholderText="Pretraga partnera"
+                                    QueryIcon="People"
+                                    Width="300"
+                                    TextChanged="PartnerAutoSuggestBox_TextChanged"
+                                    QuerySubmitted="PartnerAutoSuggestBox_QuerySubmitted"
+                                    DisplayMemberPath="Value"
+                                    TextMemberPath="Value"
+                                    IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                    <TextBlock Name="PartnerErrorTextBlock"
+                               Text="{x:Bind ViewModel.Errors.IdPartnera, Mode=OneWay}"
+                               Visibility="{x:Bind ViewModel.Errors.IdPartnera, Mode=OneWay, Converter={StaticResource StringContentToVisibleConverter}}"
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="Red"
+                               RelativePanel.Below="PartnerAutoSuggestBox"/>
+                </RelativePanel>
+                <TextBlock Text="Porez"
+                           Grid.Row="2"
+                           Grid.Column="2"
+                           Margin="6"/>
+                <custom:ValidationTextBox Text="{x:Bind ViewModel.CurrentItem.PostoPorez, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
+                                          ErrorMessage="{x:Bind ViewModel.Errors.PostoPorez, Mode=OneWay}"
+                                          TextChangedAction="{x:Bind ViewModel.ValidatePropertyAction('PostoPorez')}"
+                                          TotalElementWidth="300"
+                                          IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                          Grid.Row="2"
+                                          Grid.Column="3"/>
+                <TextBlock Text="Datum"
+                           Grid.Row="3"
+                           Grid.Column="0"
+                           Margin="6"/>
+                <DatePicker Name="DatumDatePicker"
+                            Date="{x:Bind ViewModel.CurrentItem.DatDokumenta, Converter={StaticResource DateTimeToDateTimeOffsetConverter}, Mode=TwoWay}"
+                            Grid.Column="1"
+                            Grid.Row="3"
+                            Width="300"
+                            IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                            BorderBrush="{StaticResource TextBoxBorderThemeBrush}"/>
+                <TextBlock Text="Iznos"
+                           Grid.Row="3"
+                           Grid.Column="2"
+                           Margin="6"/>
+                <custom:ValidationTextBox Text="{x:Bind ViewModel.CurrentItem.IznosDokumenta, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
+                                          ErrorMessage=""
+                                          TotalElementWidth="300"
+                                          Grid.Row="3"
+                                          Grid.Column="3"
+                                          IsEnabled="False"/>
             </Grid>
             <Button Name="AddNewStavkaButton"
                     Content="+ Dodaj Stavku"
-                    Click="{x:Bind ViewModel.NewStavka}"
+                    Click="AddNewStavkaButton_Click"
                     Margin="20,0,0,-40"
                     Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"
                     RelativePanel.Above="StavkeListView"/>
             <ListView Name="StavkeListView"
-                      RelativePanel.Below="DetailsGrid"
+                      RelativePanel.Below="DetailsGrid2"
                       RelativePanel.AlignBottomWithPanel="True"
                       Margin="0,40,0,0"
                       SelectionMode="None"
                       BorderBrush="Gray"
                       Style="{StaticResource FixedHeaderListViewStyle}"
-                      ItemsSource="{x:Bind ViewModel.CurrentDokument.Stavke, Mode=OneWay}">
+                      ItemsSource="{x:Bind ViewModel.StavkeList, Mode=OneWay}">
                 <ListView.HeaderTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal" Margin="10,0">
@@ -361,46 +291,67 @@
                     </DataTemplate>
                 </ListView.HeaderTemplate>
                 <ListView.ItemTemplate>
-                    <DataTemplate x:DataType="model:Stavka">
-                        <StackPanel Orientation="Horizontal">
-                            <ComboBox Width="295"
-                                      Margin="5,0"
-                                      DisplayMemberPath="NazArtikla"
-                                      ItemsSource="{x:Bind ArtiklList, Mode=OneWay}"
-                                      SelectedItem="{Binding Artikl, Mode=TwoWay}"
-                                      IsEnabled="{x:Bind InEditMode, Mode=OneWay}"/>
+                    <DataTemplate x:DataType="viewmodel:StavkaViewModel">
+                        <StackPanel Orientation="Horizontal"
+                                    BorderBrush="{ThemeResource ListViewItemSelectedForegroundThemeBrush}">
+                            <RelativePanel Width="295"
+                                           Margin="5,5,0,5">
+                                <Button Name="ChangeArtiklButton"
+                                        Tag="{Binding}"
+                                        Click="ChangeArtiklButton_Click"
+                                        Visibility="{x:Bind InEditMode, Mode=OneWay}"
+                                        RelativePanel.AlignTopWithPanel="True"
+                                        RelativePanel.AlignRightWithPanel="True"
+                                        RelativePanel.AlignBottomWithPanel="True"
+                                        VerticalAlignment="Center">
+                                    <SymbolIcon Symbol="Edit"/>
+                                </Button>
+                                <TextBlock Text="{Binding Artikl.NazArtikla, Mode=OneWay}"
+                                           RelativePanel.AlignLeftWithPanel="True"
+                                           RelativePanel.LeftOf="ChangeArtiklButton"
+                                           TextWrapping="Wrap"/>
+                            </RelativePanel>
                             <TextBlock Text="{Binding JedMjere, Mode=OneWay}"
                                        Width="50"
-                                       Margin="5"
-                                       TextAlignment="Right"/>
-                            <TextBox Text="{Binding KolArtikla, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
-                                     InputScope="Number"
-                                     Width="100"
-                                     Margin="5"
-                                     IsEnabled="{x:Bind InEditMode, Mode=OneWay}"
-                                     PlaceholderText="Količina"
-                                     TextAlignment="Right"/>
+                                       Margin="8"
+                                       TextAlignment="Right"
+                                       VerticalAlignment="Bottom"/>
+                            <custom:ValidationTextBox AttributeName="KolArtikla"
+                                                      Text="{Binding KolArtikla, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
+                                                      TotalElementWidth="100"
+                                                      Margin="5"
+                                                      IsEnabled="{x:Bind InEditMode, Mode=OneWay}"
+                                                      ErrorMessage="{Binding Errors.KolArtikla, Mode=OneWay}"
+                                                      TextChangedAction="{x:Bind ValidatePropertyAction('KolArtikla')}"
+                                                      VerticalAlignment="Bottom"/>
                             <TextBlock Text="{Binding JedCijArtikla, Mode=OneWay, Converter={StaticResource DecimalToStringConverter}}"
                                        Width="150"
-                                       Margin="5"
-                                       TextAlignment="Right"/>
-                            <TextBox Text="{Binding PostoRabat, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
-                                     Width="120"
-                                     InputScope="Number"
-                                     Margin="5"
-                                     PlaceholderText="Posto rabat"
-                                     IsEnabled="{x:Bind InEditMode, Mode=OneWay}"/>
+                                       Margin="8"
+                                       TextAlignment="Right"
+                                       VerticalAlignment="Bottom"/>
+                            <custom:ValidationTextBox AttributeName="PostoRabat"
+                                                      Text="{Binding PostoRabat, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
+                                                      TotalElementWidth="120"
+                                                      Margin="5"
+                                                      IsEnabled="{x:Bind InEditMode, Mode=OneWay}"
+                                                      ErrorMessage="{x:Bind Errors.PostoRabat, Mode=OneWay}"
+                                                      TextChangedAction="{x:Bind ValidatePropertyAction('PostoRabat')}"
+                                                      VerticalAlignment="Bottom"/>
                             <TextBlock Text="{Binding Ukupno, Mode=OneWay, Converter={StaticResource DecimalToStringConverter}}"
                                        Width="130"
-                                       Margin="5"
-                                       TextAlignment="Right"/>
-                            <Button Name="DeleteButton"
-                                    Content="X"
+                                       Margin="8"
+                                       TextAlignment="Right"
+                                       VerticalAlignment="Bottom"/>
+                            <Button Name="DeleteStavkaButton"
                                     Foreground="Red"
-                                    Click="DeleteButton_Click"
+                                    Click="DeleteStavkaButton_Click"
                                     ToolTipService.ToolTip="Izbriši stavku"
                                     Tag="{Binding}"
-                                    Visibility="{x:Bind InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
+                                    Visibility="{x:Bind InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"
+                                    VerticalAlignment="Bottom"
+                                    Margin="5">
+                                <SymbolIcon Symbol="Delete"/>
+                            </Button>
                         </StackPanel>
                     </DataTemplate>
                 </ListView.ItemTemplate>

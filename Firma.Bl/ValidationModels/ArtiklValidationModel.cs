@@ -7,8 +7,71 @@ using System.Threading.Tasks;
 
 namespace Firma.Bl.ValidationModels
 {
-    public class ArtiklValidationModel : ObservableModel
+    public class ArtiklValidationModel : ValidationModelBase
     {
+        public ArtiklValidationModel()
+            : base()
+        {
+        }
+
+        public override void ClearErrors(bool notify)
+        {
+            sifArtikla = string.Empty;
+            nazArtikla = string.Empty;
+            jedMjere = string.Empty;
+            cijArtikla = string.Empty;
+            zastUsluga = string.Empty;
+            tekstArtikla = string.Empty;
+        }
+
+        public void ClearProperty(string propertyName)
+        {
+            switch (propertyName)
+            {
+                case nameof(SifArtikla):
+                    sifArtikla = string.Empty;
+                    break;
+                case nameof(NazArtikla):
+                    nazArtikla = string.Empty;
+                    break;
+                case nameof(JedMjere):
+                    jedMjere = string.Empty;
+                    break;
+                case nameof(CijArtikla):
+                    cijArtikla = string.Empty;
+                    break;
+                case nameof(ZastUsluga):
+                    zastUsluga = string.Empty;
+                    break;
+                case nameof(TekstArtikla):
+                    tekstArtikla = string.Empty;
+                    break;
+                default:    // Ovaj default postoji za slucaj da se pozove
+                    return; // za nepostojeci property da se ne poziva OnPropertyChanged().
+            }
+            OnPropertyChanged(propertyName);
+        }
+
+        #region Base
+
+        public override bool CheckDirty()
+        {
+            if (!string.IsNullOrEmpty(sifArtikla)
+                || !string.IsNullOrEmpty(nazArtikla)
+                || !string.IsNullOrEmpty(jedMjere)
+                || !string.IsNullOrEmpty(cijArtikla)
+                || !string.IsNullOrEmpty(zastUsluga)
+                || !string.IsNullOrEmpty(tekstArtikla))
+                IsDirty = true;
+            else
+                IsDirty = false;
+            return isDirty;
+        }
+
+        #endregion
+
+        #region Private
+
         private string sifArtikla;
         private string nazArtikla;
         private string jedMjere;
@@ -16,6 +79,9 @@ namespace Firma.Bl.ValidationModels
         private string zastUsluga;
         private string tekstArtikla;
 
+        #endregion
+
+        #region Public
         public string SifArtikla
         {
             get { return sifArtikla; }
@@ -93,5 +159,7 @@ namespace Firma.Bl.ValidationModels
                 OnPropertyChanged();
             }
         }
+
+        #endregion
     }
 }

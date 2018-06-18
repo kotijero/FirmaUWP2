@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 
 namespace Firma.Model
 {
-    public class Partner // : INotifyPropertyChanged
+    public class Partner : ListableModel
     {
         #region Constructors
 
         public Partner()
         {
-            tipPartnera = string.Empty;
+            tipPartnera = Constants.Nedefinirano;
             adrPartnera = string.Empty;
             adrIsporuke = string.Empty;
             oib = string.Empty;
@@ -27,10 +27,14 @@ namespace Firma.Model
             // tvrtka
             nazivTvrtke = string.Empty;
             matBrTvrtke = string.Empty;
+
+            mjestoIsporukeLookup = Defaults.MjestoLookup;
+            mjestoPartneraLookup = Defaults.MjestoLookup;
         }
 
         public Partner(DTO.Partner partner, List<LookupModel> mjestoLookupList)
         {
+
             idPartnera = partner.IdPartnera;
             tipPartnera = partner.TipPartnera;
             oib = partner.OIB;
@@ -87,17 +91,6 @@ namespace Firma.Model
                 nazivTvrtke = ((DTO.Tvrtka)partner).NazivTvrtke;
                 matBrTvrtke = ((DTO.Tvrtka)partner).MatBrTvrtke;
             }
-        }
-
-        #endregion
-
-        #region NotifyPropertyChanged Implementation
-
-        //public event PropertyChangedEventHandler PropertyChanged;
-
-        public void OnPropertyChanged([CallerMemberName]string propertyName = null)
-        {
-          //  this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
         #endregion
@@ -219,6 +212,8 @@ namespace Firma.Model
                 if (TipPartnera.Equals(Constants.OsobaTip))
                 {
                     imeOsobe = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(Title));
                 }
             }
         }
@@ -241,6 +236,8 @@ namespace Firma.Model
                 if (TipPartnera.Equals(Constants.OsobaTip))
                 {
                     prezimeOsobe = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(Title));
                 }
             }
         }
@@ -264,6 +261,8 @@ namespace Firma.Model
                 if (TipPartnera.Equals(Constants.TvrtkaTip))
                 {
                     nazivTvrtke = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(Title));
                 }
             }
         }
@@ -286,6 +285,8 @@ namespace Firma.Model
                 if (TipPartnera.Equals(Constants.TvrtkaTip))
                 {
                     matBrTvrtke = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(Title));
                 }
             }
         }
@@ -317,12 +318,22 @@ namespace Firma.Model
             get { return mjestoIsporukeLookup; }
             set
             {
-                mjestoIsporukeLookup = value;
                 if (value != null)
-                    idMjestaIsporuke = value.Key;
+                {
+                    if (value.Key != mjestoIsporukeLookup.Key)
+                    {
+                        mjestoIsporukeLookup = value;
+                        idMjestaIsporuke = value.Key;
+                        OnPropertyChanged();
+                    }
+                }
                 else
+                {
+                    mjestoIsporukeLookup = Defaults.MjestoLookup;
                     idMjestaIsporuke = -1;
-                OnPropertyChanged();
+                    OnPropertyChanged();
+                }
+                
             }
         }
         public LookupModel MjestoSjedistaLookup
@@ -330,14 +341,31 @@ namespace Firma.Model
             get { return mjestoPartneraLookup; }
             set
             {
-                mjestoPartneraLookup = value;
                 if (value != null)
-                    idMjestaPartnera = value.Key;
+                {
+                    if (value.Key != mjestoPartneraLookup.Key)
+                    {
+                        mjestoPartneraLookup = value;
+                        idMjestaPartnera = value.Key;
+                        OnPropertyChanged();
+                        OnPropertyChanged(nameof(Subtitle));
+                    }
+                }
                 else
+                {
                     idMjestaPartnera = -1;
-                OnPropertyChanged();
+                    mjestoPartneraLookup = Defaults.MjestoLookup;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(Subtitle));
+                }
             }
         }
+
+        public override string Title => Naziv;
+
+        public override string Subtitle => MjestoSjedistaLookup.Value;
+
+        public override string Subsubtitle => string.Empty;
 
         #endregion
 

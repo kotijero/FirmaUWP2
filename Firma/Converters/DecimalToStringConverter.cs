@@ -11,7 +11,7 @@ namespace Firma.Converters
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            return ((decimal)value).ToString("0.00");
+            return ((decimal)value).ToString("N");
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

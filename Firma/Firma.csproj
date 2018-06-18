@@ -98,13 +98,38 @@
     <Compile Include="Converters\ChangeTypeConverter.cs" />
     <Compile Include="Converters\DateTimeToDateTimeOffsetConverter.cs" />
     <Compile Include="Converters\DecimalToStringConverter.cs" />
+    <Compile Include="Converters\EditModeToWidthConverter.cs" />
     <Compile Include="Converters\FalseToVisibleConverter.cs" />
+    <Compile Include="Converters\IsPositiveToForegroundColorConverter.cs" />
     <Compile Include="Converters\OsobaToTrueConverter.cs" />
     <Compile Include="Converters\OsobaToVisibleConverter.cs" />
+    <Compile Include="Converters\StringContentToErrorBrushConverter.cs" />
     <Compile Include="Converters\StringContentToVisibleConverter.cs" />
+    <Compile Include="Converters\ToListableModelConverter.cs" />
     <Compile Include="Converters\TrueToVisibleConverter.cs" />
     <Compile Include="Converters\TvrtkaToTrueConverter.cs" />
     <Compile Include="Converters\TvrtkaToVisibleConverter.cs" />
+    <Compile Include="CustomControls\ArtiklPicker.xaml.cs">
+      <DependentUpon>ArtiklPicker.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\CrudControlsBar.xaml.cs">
+      <DependentUpon>CrudControlsBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\DokumentPickerDialog.xaml.cs">
+      <DependentUpon>DokumentPickerDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\FilteredListView.xaml.cs">
+      <DependentUpon>FilteredListView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\NewUserContentDialog.xaml.cs">
+      <DependentUpon>NewUserContentDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\SignInContentDialog.xaml.cs">
+      <DependentUpon>SignInContentDialog.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CustomControls\ValidationTextBox.xaml.cs">
+      <DependentUpon>ValidationTextBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -115,8 +140,20 @@
     <Compile Include="Views\DokumentDetails.xaml.cs">
       <DependentUpon>DokumentDetails.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\KorisniciList.xaml.cs">
+      <DependentUpon>KorisniciList.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LocationDetails.xaml.cs">
+      <DependentUpon>LocationDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LokacijeDetails.xaml.cs">
+      <DependentUpon>LokacijeDetails.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PartnerDetails.xaml.cs">
       <DependentUpon>PartnerDetails.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SettingsPage.xaml.cs">
+      <DependentUpon>SettingsPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -126,6 +163,24 @@
     <None Include="Firma_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\CustomSplashScreen2.png" />
+    <Content Include="Assets\SplashScreen.scale-100.png" />
+    <Content Include="Assets\SplashScreen.scale-125.png" />
+    <Content Include="Assets\SplashScreen.scale-150.png" />
+    <Content Include="Assets\SplashScreen.scale-400.png" />
+    <Content Include="Assets\Square44x44Logo.altform-unplated_targetsize-16.png" />
+    <Content Include="Assets\Square44x44Logo.altform-unplated_targetsize-256.png" />
+    <Content Include="Assets\Square44x44Logo.altform-unplated_targetsize-32.png" />
+    <Content Include="Assets\Square44x44Logo.altform-unplated_targetsize-48.png" />
+    <Content Include="Assets\Square44x44Logo.scale-100.png" />
+    <Content Include="Assets\Square44x44Logo.scale-125.png" />
+    <Content Include="Assets\Square44x44Logo.scale-150.png" />
+    <Content Include="Assets\Square44x44Logo.scale-400.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-16.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-24.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-256.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-32.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-48.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
@@ -140,6 +195,34 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="CustomControls\ArtiklPicker.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CustomControls\CrudControlsBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CustomControls\DokumentPickerDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CustomControls\FilteredListView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CustomControls\NewUserContentDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CustomControls\SignInContentDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CustomControls\ValidationTextBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -152,7 +235,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\KorisniciList.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LocationDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LokacijeDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\PartnerDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SettingsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

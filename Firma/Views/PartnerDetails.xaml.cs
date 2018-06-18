@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Firma.Helpers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using ViewModel;
+using ViewModel.DomainViewModels;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -30,21 +32,56 @@ namespace Firma.Views
             ViewModel = new PartnerViewModel();
             this.InitializeComponent();
             this.NavigationCacheMode = Windows.UI.Xaml.Navigation.NavigationCacheMode.Enabled;
+            
         }
 
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
-            await ViewModel.Load();
-            // Navigation logic
-            //Frame rootFrame = Window.Current.Content as Frame;
-            //if (rootFrame.CanGoBack)
-            //{
-            //    Windows.UI.Core.SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.Visible;
-            //}
-            //else
-            //{
-            //    Windows.UI.Core.SystemNavigationManager.GetForCurrentView().AppViewBackButtonVisibility = Windows.UI.Core.AppViewBackButtonVisibility.Collapsed;
-            //}
+            await Task.Run(() => ViewModel.Load());
+        }
+
+        protected async override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            base.OnNavigatingFrom(e);
+            if (ViewModel.InEditMode)
+            {
+                ContentDialog contentDialog = new ContentDialog
+                {
+                    Title = "Spremanje izmjena",
+                    Content = "Želite li spremiti izmjene?",
+                    PrimaryButtonText = "Da",
+                    SecondaryButtonText = "Ne",
+                    CloseButtonText = "Natrag"
+                };
+                var response = await contentDialog.ShowAsync();
+                if (response == ContentDialogResult.Primary)
+                {
+                    var result = ViewModel.Save();
+                    if (!string.IsNullOrEmpty(result))
+                    {
+                        e.Cancel = true;
+                        ContentDialog errorDialog = new ContentDialog
+                        {
+                            Title = "Pogreška",
+                            Content = result,
+                            CloseButtonText = "U redu"
+                        };
+                        await errorDialog.ShowAsync();
+                    }
+                }
+                else if (response == ContentDialogResult.Secondary)
+                {
+                    ViewModel.Cancel();
+                }
+                else
+                {
+                    e.Cancel = true;
+                }
+            }
+            else
+            {
+                ViewModel.ShowDetails = false;
+            }
         }
 
         private bool On_BackRequested()
@@ -63,12 +100,6 @@ namespace Firma.Views
             args.Handled = true;
         }
 
-        private void AutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-        {
-            
-            ViewModel.Filter = sender.Text;
-        }
-
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             On_BackRequested();
@@ -77,6 +108,43 @@ namespace Firma.Views
         private void ValidateOnFocusLost(object sender, RoutedEventArgs e)
         {
             ViewModel.ValidateProperty((sender as TextBox).Tag as string);
+        }
+
+        private void ValidateOnTextChanged(object sender, TextChangedEventArgs e)
+        {
+            ViewModel.ValidateProperty((sender as TextBox).Tag as string);
+        }
+
+        private void MjSjedistaAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+            {
+                sender.ItemsSource = ViewModel.QueryMjesto(sender.Text);
+            }
+        }
+
+        private void MjSjedistaAutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            if (args.ChosenSuggestion != null)
+            {
+                ViewModel.SubmitMjPartnera((LookupModel)args.ChosenSuggestion);
+            }
+        }
+
+        private void MjIsporukeAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            if (args.Reason == AutoSuggestionBoxTextChangeReason.UserInput)
+            {
+                sender.ItemsSource = ViewModel.QueryMjesto(sender.Text);
+            }
+        }
+
+        private void MjIsporukeAutoSuggestBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            if (args.ChosenSuggestion != null)
+            {
+                ViewModel.SubmitMjPartnera((LookupModel)args.ChosenSuggestion);
+            }
         }
     }
 }

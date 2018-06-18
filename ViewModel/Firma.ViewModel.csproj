@@ -106,10 +106,23 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ArtiklViewModel.cs" />
-    <Compile Include="DokumentViewModel.cs" />
-    <Compile Include="PartnerViewModel.cs" />
+    <Compile Include="CustomControlViewModels\ArtiklPickerViewModel.cs" />
+    <Compile Include="CustomControlViewModels\CrudControlsViewModel.cs" />
+    <Compile Include="CustomControlViewModels\DokumentPickerViewModel.cs" />
+    <Compile Include="CustomControlViewModels\FilteredListViewModel.cs" />
+    <Compile Include="DetailsViewModelBase.cs" />
+    <Compile Include="DomainViewModels\ArtiklViewModel.cs" />
+    <Compile Include="DomainViewModels\DokumentViewModel.cs" />
+    <Compile Include="DomainViewModels\DrzavaViewModel.cs" />
+    <Compile Include="DomainViewModels\KorisnikViewModel.cs" />
+    <Compile Include="CustomControlViewModels\SignInViewModel.cs" />
+    <Compile Include="DomainViewModels\PartnerViewModel.cs" />
+    <Compile Include="MainPageViewModel.cs" />
+    <Compile Include="DomainViewModels\MjestoViewModel.cs" />
+    <Compile Include="CustomControlViewModels\NewKorisnikViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SettingsViewModel.cs" />
+    <Compile Include="DomainViewModels\StavkaViewModel.cs" />
     <EmbeddedResource Include="Properties\ViewModel.rd.xml" />
   </ItemGroup>
   <ItemGroup>

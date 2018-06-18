@@ -12,10 +12,10 @@ namespace Firma.Bl.ValidationModels
         public PartnerValidationModel()
             : base()
         {
-            ClearErrors(false);
+            
         }
 
-        public void ClearErrors(bool notify)
+        public override void ClearErrors(bool notify)
         {
             idPartnera = string.Empty;
             tipPartnera = string.Empty;
@@ -67,7 +67,7 @@ namespace Firma.Bl.ValidationModels
                 case nameof(PrezimeOsobe):
                     prezimeOsobe = string.Empty;
                     break;
-                case nameof(nazivTvrtke):
+                case nameof(NazivTvrtke):
                     nazivTvrtke = string.Empty;
                     break;
                 case nameof(MatBrTvrtke):
@@ -223,6 +223,7 @@ namespace Firma.Bl.ValidationModels
                 else
                     nazivTvrtke += $"\n{value}";
                 CheckDirty();
+                OnPropertyChanged();
             }
         }
 

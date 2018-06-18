@@ -3,6 +3,7 @@ using Firma.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -138,7 +139,6 @@ namespace Firma.DAL
                 {
                     Osoba osoba = new Osoba
                     {
-
                         ImeOsobe = (string)row["ImeOsobe"],
                         PrezimeOsobe = (string)row["PrezimeOsobe"],
                         IdPartnera = (int)row["IdPartnera"],
@@ -159,8 +159,9 @@ namespace Firma.DAL
 
         public List<LookupModel> FetchLookup()
         {
-            string query = String.Format(@"SELECT IdPartnera, ImeOsobe, PrezimeOsobe, NazivTvrtke, TipPartnera FROM Partner LEFT JOIN Osoba ON Partner.IdPartnera = Osoba.IdOsobe
-                                                                                                               LEFT JOIN Tvrtka ON Partner.IdPartnera = Tvrtka.IdTvrtke");
+            string query = @"SELECT IdPartnera, ImeOsobe, PrezimeOsobe, NazivTvrtke, TipPartnera 
+                               FROM Partner LEFT JOIN Osoba ON Partner.IdPartnera = Osoba.IdOsobe
+                                            LEFT JOIN Tvrtka ON Partner.IdPartnera = Tvrtka.IdTvrtke";
             DataTable result = QueryExecutor.ExecuteQuery(query);
             List<LookupModel> res = new List<LookupModel>();
             foreach (DataRow row in result.Rows)
@@ -179,29 +180,45 @@ namespace Firma.DAL
 
         public Partner AddItem(Partner item)
         {
-            string query = String.Format(@"INSERT INTO Partner (TipPartnera, OIB, IdMjestaPartnera, AdrPartnera, IdMjestaIsporuke, AdrIsporuke)
-                                                OUTPUT Inserted.IdPartnera
-                                                VALUES ('{0}', '{1}', {2}, '{3}', {4}, '{5}')",
-                                                item.TipPartnera,
-                                                item.OIB,
-                                                item.IdMjestaIsporuke,
-                                                item.AdrPartnera,
-                                                item.IdMjestaIsporuke,
-                                                item.AdrIsporuke);
-            DataTable res = QueryExecutor.ExecuteQuery(query);
+            string query = @"INSERT INTO Partner (TipPartnera, OIB, IdMjestaPartnera, AdrPartnera, IdMjestaIsporuke, AdrIsporuke)
+                                  OUTPUT Inserted.IdPartnera
+                                  VALUES (@TipPartnera, @OIB, @IdMjestaPartnera, @AdrPartnera, @IdMjestaIsporuke, @AdrIsporuke)";
+            List<SqlParameter> sqlParameters = new List<SqlParameter>
+            {
+                new SqlParameter("@TipPartnera", item.TipPartnera),
+                new SqlParameter("@OIB", item.OIB),
+                new SqlParameter("@IdMjestaPartnera", (object)item.IdMjestaPartnera ?? DBNull.Value),
+                new SqlParameter("@AdrPartnera", item.AdrPartnera),
+                new SqlParameter("@IdMjestaIsporuke", (object)item.IdMjestaIsporuke ?? DBNull.Value),
+                new SqlParameter("@AdrIsporuke", item.AdrIsporuke)
+            };
+            DataTable res = QueryExecutor.ExecuteQuery(query, sqlParameters);
             item.IdPartnera = (int)(res.Rows[0])["IdPartnera"];
             if (item.TipPartnera.Equals(Constants.OsobaTip))
             {
                 Osoba osoba = (Osoba)item;
-                query = $@"INSERT INTO Osoba (ImeOsobe, PrezimeOsobe)
-                                VALUES ('{osoba.ImeOsobe}', '{osoba.PrezimeOsobe}')";
-                QueryExecutor.ExecuteNonQuery(query);
+                List<SqlParameter> osobaParameters = new List<SqlParameter>
+                {
+                    new SqlParameter("@IdOsobe", item.IdPartnera),
+                    new SqlParameter("@ImeOsobe", osoba.ImeOsobe),
+                    new SqlParameter("@PrezimeOsobe", osoba.PrezimeOsobe)
+                };
+                query = @"INSERT INTO Osoba (IdOsobe, ImeOsobe, PrezimeOsobe)
+                               VALUES (@IdOsobe, @ImeOsobe, @PrezimeOsobe)";
+                QueryExecutor.ExecuteNonQuery(query, osobaParameters);
             }
             else
             {
                 Tvrtka tvrtka = (Tvrtka)item;
-                query = $@"INSERT INTO Tvrtka (NazivTvrtke, MatBrTvrtke)
-                                VALUES ('{tvrtka.NazivTvrtke}', '{tvrtka.MatBrTvrtke}')";
+                List<SqlParameter> tvrtkaParamters = new List<SqlParameter>
+                {
+                    new SqlParameter("@IdTvrtke", item.IdPartnera),
+                    new SqlParameter("@NazivTvrtke", tvrtka.NazivTvrtke),
+                    new SqlParameter("@MatBrTvrtke", tvrtka.MatBrTvrtke)
+                };
+                query = @"INSERT INTO Tvrtka (IdTvrtke, NazivTvrtke, MatBrTvrtke)
+                               VALUES (@IdTvrtke, @NazivTvrtke, @MatBrTvrtke)";
+                QueryExecutor.ExecuteNonQuery(query, tvrtkaParamters);
             }
             return item;
         }
@@ -226,45 +243,53 @@ namespace Firma.DAL
             QueryExecutor.ExecuteNonQuery(query);
             if (item.TipPartnera.Equals(Constants.OsobaTip))
             {
+                Osoba osoba = (Osoba)item;
+                List<SqlParameter> osobaParameters = new List<SqlParameter>
+                {
+                    new SqlParameter("@IdOsobe", item.IdPartnera),
+                    new SqlParameter("@ImeOsobe", osoba.ImeOsobe),
+                    new SqlParameter("@PrezimeOsobe", osoba.PrezimeOsobe)
+                };
                 query = $@"UPDATE Osoba
-                              SET ImeOsobe = '{((Osoba)item).ImeOsobe}'
-                                  PrezimeOsobe '{((Osoba)item).PrezimeOsobe}
-                            WHERE IdOsobe = {item.IdPartnera}";
+                              SET ImeOsobe = @ImeOsobe
+                                  PrezimeOsobe @PrezimeOsobe
+                            WHERE IdOsobe = @IdOsobe";
             }
             else
             {
+                Tvrtka tvrtka = (Tvrtka)item;
+                List<SqlParameter> tvrtkaParamters = new List<SqlParameter>
+                {
+                    new SqlParameter("@IdTvrtke", item.IdPartnera),
+                    new SqlParameter("@NazivTvrtke", tvrtka.NazivTvrtke),
+                    new SqlParameter("@MatBrTvrtke", tvrtka.MatBrTvrtke)
+                };
                 query = $@"UPDATE Tvrtka
-                              SET MatBrTvrtke = '{((Tvrtka)item).MatBrTvrtke}'
-                                  NazivTvrtke = '{((Tvrtka)item).MatBrTvrtke}'
-                            WHERE IdTvrtke = {item.IdPartnera}";
+                              SET MatBrTvrtke = @MatBrTvrtke
+                                  NazivTvrtke = @NazivTvrtke
+                            WHERE IdTvrtke = @IdTvrtke";
             }
             QueryExecutor.ExecuteNonQuery(query);
         }
 
-        public string DeleteItem(Partner item)
+        public bool DeleteItem(Partner item)
         {
-            string query = $"SELECT COUNT(*) FROM Dokument WHERE IdPartnera = {item.IdPartnera}";
-            var res = QueryExecutor.ExecuteQuery(query);
-            if ((int)(res.Rows)[0][0] > 0)
-            {
-                return "Nije moguće obrisati partnera jer baza sadrži dokumente vezane za njega.";
-            }
-
+            string query = string.Empty;
             if (item.TipPartnera.Equals(Constants.OsobaTip))
             {
                 query = $"DELETE FROM Osoba WHERE IdOsobe = {item.IdPartnera}";
-                if (QueryExecutor.ExecuteNonQuery(query) < 1) return "Nije moguće obrisati.";
+                if (QueryExecutor.ExecuteNonQuery(query) < 1) return false;
             }
             else
             {
                 query = $"DELETE FROM Tvrtka WHERE IdTvrtke = {item.IdPartnera}";
-                if (QueryExecutor.ExecuteNonQuery(query) < 1) return "Nije moguće obrisati.";
+                if (QueryExecutor.ExecuteNonQuery(query) < 1) return false;
             }
 
             query = $"DELETE FROM Partner WHERE IdPartnera = {item.IdPartnera}";
-            if (QueryExecutor.ExecuteNonQuery(query) < 1) return "Nije moguće obrisati";
+            if (QueryExecutor.ExecuteNonQuery(query) < 1) return false;
             
-            return string.Empty;
+            return true;
         }
     }
 }

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Firma.Model
 {
-    public class Stavka : ObservableModel
+    public class Stavka : ListableModel
     {
         public Stavka()
         {
@@ -25,18 +25,12 @@ namespace Firma.Model
             kolArtikla = stavka.KolArtikla;
             jedCijArtikla = stavka.JedCijArtikla;
             postoRabat = stavka.PostoRabat;
-            artikl = new Artikl(stavka.Artikl);
         }
 
-        public Stavka(DTO.Stavka stavka, List<Artikl> artiklList)
+        public Stavka(DTO.Stavka stavka, Artikl artikl)
+            :this(stavka)
         {
-            idStavke = stavka.IdStavke;
-            idDokumenta = stavka.IdDokumenta;
-            sifArtikla = stavka.SifArtikla;
-            kolArtikla = stavka.KolArtikla;
-            jedCijArtikla = stavka.JedCijArtikla;
-            postoRabat = stavka.PostoRabat;
-            artikl = artiklList.FirstOrDefault(t => t.SifArtikla.Equals(sifArtikla));
+            this.artikl = artikl;
         }
 
         #region Private properties
@@ -59,7 +53,6 @@ namespace Firma.Model
             set
             {
                 idStavke = value;
-                OnPropertyChanged();
             }
         }
         public int IdDokumenta
@@ -68,7 +61,6 @@ namespace Firma.Model
             set
             {
                 idDokumenta = value;
-                OnPropertyChanged();
             }
         }
         public int SifArtikla
@@ -77,7 +69,6 @@ namespace Firma.Model
             set
             {
                 sifArtikla = value;
-                OnPropertyChanged();
             }
         }
         public decimal KolArtikla
@@ -86,8 +77,6 @@ namespace Firma.Model
             set
             {
                 kolArtikla = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(Ukupno));
             }
         }
         public decimal JedCijArtikla
@@ -96,8 +85,6 @@ namespace Firma.Model
             set
             {
                 jedCijArtikla = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(Ukupno));
             }
         }
         public decimal PostoRabat
@@ -106,7 +93,6 @@ namespace Firma.Model
             set
             {
                 postoRabat = value;
-                OnPropertyChanged();
             }
         }
 
@@ -116,57 +102,16 @@ namespace Firma.Model
             set
             {
                 artikl = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(NazArtikla));
-                OnPropertyChanged(nameof(JedMjere));
-                OnPropertyChanged(nameof(Ukupno));
             }
         }
+
+        public override string Title => Artikl.NazArtikla;
+
+        public override string Subtitle => KolArtikla + " " + Artikl.JedMjere;
+
+        public override string Subsubtitle => $"{kolArtikla * jedCijArtikla}";
 
         #endregion
-
-        public List<Artikl> ArtiklList { get; set; }
-
-        private bool inEditMode;
-        public bool InEditMode
-        {
-            get { return inEditMode; }
-            set
-            {
-                inEditMode = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public string NazArtikla
-        {
-            get
-            {
-                if (Artikl == null)
-                    return "-";
-                else
-                    return this.Artikl.NazArtikla;
-            }
-        }
-
-        public string JedMjere
-        {
-            get
-            {
-                if (Artikl == null)
-                    return "-";
-                else
-                    return this.Artikl.JedMjere;
-            }
-        }
-
-        public decimal Ukupno
-        {
-            get
-            {
-                return KolArtikla * JedCijArtikla;
-            }
-        }
 
 
 
