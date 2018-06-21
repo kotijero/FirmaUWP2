@@ -9,18 +9,45 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ViewModel.CustomControlViewModels;
+using ViewModel.CustomDataSources;
 
 namespace ViewModel.DomainViewModels
 {
-    public class DokumentViewModel : DetailsViewModelBase<Dokument>
+    public class DokumentVirtualizationViewModel : ObservableModel
     {
-        public DokumentViewModel()
-            : base((t, s) => t.BrDokumenta.ToString().Contains(s) || t.VrDokumenta.ToLower().Contains(s.ToLower()))
+
+        public DokumentVirtualizationViewModel()
         {
+            loading = true;
+            showDetails = false;
+            inEditMode = false;
+            isNewItem = false;
+            newItem = new Dokument();
+            currentPosition = -1;
+            itemLoaded = false;
+
+            CrudControlsViewModel = new CrudControlsViewModel()
+            {
+                NewAction = () => New(),
+                EditAction = () => Edit(),
+                SaveAction = () => Save(),
+                CancelAction = () => Cancel(),
+                DeleteAction = () => Delete()
+            };
+
             ArtiklList = new List<Artikl>();
         }
 
         BlDokument BlDokument = new BlDokument();
+        #region Nested ViewModels
+
+        public CrudControlsViewModel CrudControlsViewModel;
+
+        #endregion
+
+        #region DataSource
+
+        public DokumentDataSource DokumentDataSource { get; set; }
 
         #region Lookups
 
@@ -31,7 +58,67 @@ namespace ViewModel.DomainViewModels
 
         #endregion
 
-        public async override Task<string> Load()
+        #endregion
+
+        #region Position Handling
+
+        public Dokument CurrentItem
+        {
+            get
+            {
+                if (loading || !showDetails || currentPosition < 0 || isNewItem || !itemLoaded) return newItem;
+                else return (Dokument)DokumentDataSource[currentPosition];
+            }
+        }
+
+        private int currentPosition;
+
+        public int CurrentPosition
+        {
+            get { return currentPosition; }
+            set
+            {
+                currentPosition = value;
+                OnPropertyChanged();
+                PositionChanged();
+            }
+        }
+
+        public void PositionChanged()
+        {
+            ClearErrors(true);
+            // Zbog sporog (virtualnog) ucitavanja postoji slucaj kada trenutno odabrani
+            // dokument jos uvijek nije ucitan, pa da ne baci exception:
+            if (CurrentItem != null)
+            {
+                if (currentPosition < 0)
+                {
+                    ShowDetails = false;
+                }
+                else
+                {
+                    ShowDetails = true;
+                    OnPropertyChanged(nameof(CurrentItem));
+                    PartnerAutoSuggestText = CurrentItem.PartnerLookup.Value;
+                    LoadStavkeFromCurrentDokument();
+                }
+            }
+            else
+            {
+                partnerAutoSuggestText = string.Empty;
+                ItemLoaded = false;
+            }
+            
+            
+        }
+
+
+
+        #endregion
+
+        #region Loading
+
+        public async Task<string> Load()
         {
             await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
                 () =>
@@ -45,7 +132,7 @@ namespace ViewModel.DomainViewModels
             var artiklResponse = await Task.Run(() => blArtikl.FetchAll());
             if (!string.IsNullOrEmpty(artiklResponse.ErrorMessage))
             {
-                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => Loading = false );
+                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => Loading = false);
                 return artiklResponse.ErrorMessage;
             }
             ArtiklList = artiklResponse.Value;
@@ -61,32 +148,9 @@ namespace ViewModel.DomainViewModels
             var partnerLookupList = partnerReponse.Value;
             partnerLookupList.Add(Defaults.PartnerLookup);
 
-            // dokumenti
-            var dokumentReponse = await Task.Run(() => BlDokument.FetchAll(ArtiklList));
-            if (!string.IsNullOrEmpty(dokumentReponse.ErrorMessage))
-            {
-                await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => Loading = false);
-                return dokumentReponse.ErrorMessage;
-            }
-            itemsList = dokumentReponse.Value;
 
-            // dokumenti Lookup
-            List<LookupModel> dokumentLookupList = new List<LookupModel>();
-            dokumentLookupList.Add(Defaults.DokumentLookup);
-            foreach (var dokument in itemsList)
-            {
-                dokument.PartnerLookup = partnerLookupList.FirstOrDefault(t => t.Key.Equals(dokument.IdPartnera));
-                dokumentLookupList.Add(new LookupModel(dokument.IdDokumenta, dokument.LookupData));
-            }
+            DokumentDataSource = await DokumentDataSource.GetDataSourceAsync(BlDokument, ItemCache_CacheChanged);
 
-            // dokumenti normalni:
-            foreach (var dokument2 in itemsList)
-            {
-                if (dokument2.IdPrethDokumenta.HasValue)
-                    dokument2.PrethodniDokumentLookup = DokumentLookupList.FirstOrDefault(t => t.Key.Equals(dokument2.IdPrethDokumenta.Value));
-                else
-                    dokument2.PrethodniDokumentLookup = Defaults.DokumentLookup;
-            }
             await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
                 () =>
                 {
@@ -94,62 +158,118 @@ namespace ViewModel.DomainViewModels
                     {
                         PartnerLookupList.Add(partner);
                     }
-
-                    foreach (var dokumentLookup in dokumentLookupList)
-                    {
-                        DokumentLookupList.Add(dokumentLookup);
-                    }
-
-                    FilteredListViewModel.SetItemsList(itemsList);
                     Loading = false;
                 });
             return string.Empty;
         }
 
-        #region Position handling override
-
-        public override void PositionChanged()
+        protected bool loading;
+        public bool Loading
         {
-            base.PositionChanged();
-            PartnerAutoSuggestText = CurrentItem.PartnerLookup.Value;
-            LoadStavkeFromCurrentDokument();
-        }
-
-        public void OnStavkaArtiklChanged()
-        {
-            if (inEditMode)
+            get { return loading; }
+            set
             {
-                decimal total = 0.0M;
-                foreach (var stavka in StavkeList)
-                {
-                    if (stavka.Artikl != null)
-                    {
-                        total += stavka.Ukupno;
-                    }
-                }
-                CurrentItem.IznosDokumenta = total;
+                loading = value;
+                OnPropertyChanged();
             }
         }
 
         #endregion
 
-        #region InEditModeHandling
+        #region Deffered Virtual Loading
 
-        public override bool InEditMode
+        private bool itemLoaded;
+
+        public bool ItemLoaded
+        {
+            get { return itemLoaded; }
+            set
+            {
+                itemLoaded = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private void ItemCache_CacheChanged(object sender, Firma.Helpers.DataVirtualization.CacheChangedEventArgs<Dokument> args)
+        {
+            if (!itemLoaded)
+            {
+                if (CurrentItem != null)
+                {
+                    ItemLoaded = true;
+                    PositionChanged();
+                }
+            }
+        }
+
+        #endregion
+
+        #region Backup, new
+
+        protected Dokument oldItem;
+        protected Dokument newItem;
+
+        #endregion
+
+        #region Show Details
+
+        protected bool showDetails;
+
+        public bool ShowDetails
+        {
+            get { return showDetails; }
+            set
+            {
+                showDetails = value;
+                CrudControlsViewModel.ShowDetails = value;
+                OnPropertyChanged();
+            }
+        }
+
+        #endregion
+
+        #region Edit Mode
+        protected bool inEditMode;
+
+        public virtual bool InEditMode
         {
             get { return inEditMode; }
             set
             {
-                base.InEditMode = value;
+                inEditMode = value;
+                OnPropertyChanged();
                 SetStavkasEditMode();
+                OnPropertyChanged(nameof(NotInEditMode));
+                CrudControlsViewModel.InEditMode = value;
+            }
+        }
+
+        public bool NotInEditMode
+        {
+            get { return !inEditMode; }
+        }
+
+        #endregion
+
+        #region IsNewItem
+
+        protected bool isNewItem;
+        public bool IsNewItem
+        {
+            get { return isNewItem; }
+            set
+            {
+                isNewItem = value;
+                if (value) ShowDetails = true;
+                OnPropertyChanged();
             }
         }
 
         #endregion
 
-        #region CRUD
+        #region Actions
 
-        public override void Cancel()
+        public void Cancel()
         {
             InEditMode = false;
             if (IsNewItem)
@@ -174,15 +294,15 @@ namespace ViewModel.DomainViewModels
             }
         }
 
-        public override string Delete()
+        public string Delete()
         {
             Dokument toDelete = CurrentItem;
             var response = BlDokument.DeleteItem(toDelete);
             if (string.IsNullOrEmpty(response.ErrorMessage))
             {
-                itemsList.Remove(toDelete);
-
-                FilteredListViewModel.Filter = string.Empty;
+                // reload?
+                // itemsList.Remove(toDelete);
+                DokumentDataSource.Remove(toDelete);
                 return string.Empty;
             }
             else
@@ -191,7 +311,7 @@ namespace ViewModel.DomainViewModels
             }
         }
 
-        public override string Edit()
+        public string Edit()
         {
             if (!inEditMode)
             {
@@ -227,23 +347,21 @@ namespace ViewModel.DomainViewModels
             return string.Empty;
         }
 
-        public override string New()
+        public string New()
         {
             newItem = new Dokument();
-            newItem.Stavke = new List<Stavka>();
 
             IsNewItem = true;
             ShowDetails = true;
             OnPropertyChanged(nameof(IsNewItem));
             OnPropertyChanged(nameof(CurrentItem));
-            PartnerAutoSuggestText = string.Empty;
             LoadStavkeFromCurrentDokument();
             InEditMode = true;
             ClearErrors(true);
             return string.Empty;
         }
 
-        public override string Save()
+        public string Save()
         {
             BlDokument.ValidateModel(CurrentItem, Errors);
             if (Errors.CheckDirty() || CheckStavkeIsDirty())
@@ -258,9 +376,10 @@ namespace ViewModel.DomainViewModels
                     return response.ErrorMessage;
                 }
                 newItem = response.Value;
-                itemsList.Add(newItem);
-                FilteredListViewModel.Filter = string.Empty;
-                FilteredListViewModel.CurrentPosition = FilteredListViewModel.ItemsList.IndexOf(newItem);
+                // refresh?
+                // itemsList.Add(newItem);
+                DokumentDataSource.Add(newItem);
+                CurrentPosition = DokumentDataSource.IndexOf(newItem);
                 IsNewItem = false;
             }
             else
@@ -290,8 +409,6 @@ namespace ViewModel.DomainViewModels
             }
         }
 
-
-
         public ObservableCollection<StavkaViewModel> StavkeList { get; } = new ObservableCollection<StavkaViewModel>();
 
         public async void LoadStavkeFromCurrentDokument()
@@ -302,7 +419,7 @@ namespace ViewModel.DomainViewModels
                     StavkeLoading = true;
                     StavkeList.Clear();
                 });
-            if (CurrentItem != null)
+            if (CurrentItem != null )
             {
                 if (CurrentItem.Stavke == null || CurrentItem.Stavke.Count < 1)
                 {
@@ -361,30 +478,51 @@ namespace ViewModel.DomainViewModels
             StavkeList.Remove(stavka);
         }
 
+        public void OnStavkaArtiklChanged()
+        {
+            if (inEditMode)
+            {
+                decimal total = 0.0M;
+                foreach (var stavka in StavkeList)
+                {
+                    if (stavka.Artikl != null)
+                    {
+                        total += stavka.Ukupno;
+                    }
+                }
+                CurrentItem.IznosDokumenta = total;
+            }
+        }
+
         #endregion
 
         #region CustomControls VM Generators
 
         public DokumentPickerViewModel GenerateDokumentPickerViewModel()
         {
-            return new DokumentPickerViewModel(itemsList, BlDokument);
+            return new DokumentPickerViewModel(null, BlDokument);
         }
 
         #endregion
 
         #region Validation
 
-        public override void ClearErrors(bool notify)
+        public void ClearErrors(bool notify)
         {
             Errors.ClearErrors(notify);
         }
 
         public DokumentValidationModel Errors { get; } = new DokumentValidationModel();
 
-        public override void ValidateProperty(string propertyName)
+        public void ValidateProperty(string propertyName)
         {
             if (inEditMode)
                 BlDokument.ValidateProperty(CurrentItem, Errors, propertyName);
+        }
+
+        public Action<string> ValidatePropertyAction(string propertyName)
+        {
+            return (o) => ValidateProperty(propertyName);
         }
 
         #endregion
@@ -443,9 +581,12 @@ namespace ViewModel.DomainViewModels
         public string SubmitPrethodniDokument(DokumentPickerViewModel dokumentPickerViewModel)
         {
             if (dokumentPickerViewModel.SelectionMade)
-                CurrentItem.PrethodniDokumentLookup = DokumentLookupList.First(t => t.Key.Equals(dokumentPickerViewModel.ItemsList[dokumentPickerViewModel.CurrentPosition].IdDokumenta));
+            {
+                Dokument picked = dokumentPickerViewModel.ItemsList[dokumentPickerViewModel.CurrentPosition];
+                CurrentItem.PrethodniDokumentLookup = new LookupModel(picked.IdDokumenta, picked.LookupData);
+            }
             else
-                CurrentItem.PrethodniDokumentLookup = DokumentLookupList.First(t => t.Key.Equals(-1));
+                CurrentItem.PrethodniDokumentLookup = Defaults.DokumentLookup;
             return string.Empty;
         }
 

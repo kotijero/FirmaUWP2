@@ -15,7 +15,7 @@ namespace Firma.Bl
             LogException(exc);
             if (exc is SqlException)
             {
-                return $"Došlo je do problema sa bazom podataka,{Environment.NewLine}akcija nije izvršena.";
+                return $"Došlo je do problema sa bazom podataka, akcija nije izvršena.";
             }
             else if (exc is ArgumentException)
             {
@@ -33,6 +33,7 @@ namespace Firma.Bl
             errorMessage += $"---- EXCEPTION: {exc.GetType()} {Environment.NewLine}";
             errorMessage += $"     Message: {exc.Message} {Environment.NewLine}";
             errorMessage += $"     StackTrace: {exc.StackTrace}";
+            Debug.WriteLine(errorMessage);
         }
     }
 }

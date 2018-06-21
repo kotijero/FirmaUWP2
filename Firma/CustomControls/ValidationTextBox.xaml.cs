@@ -17,15 +17,22 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Firma.CustomControls
 {
+    
     public sealed partial class ValidationTextBox : UserControl
     {
         public ValidationTextBox()
         {
             this.InitializeComponent();
+            ValueTextBox.InputScope = new InputScope()
+                {
+                    Names = { new InputScopeName(InputScopeNameValue.Number) }
+                };
         }
 
         public string AttributeName { get; set; }
         public string PlaceHolderText { get; set; }
+
+        
         
         public string Text
         {
@@ -49,15 +56,37 @@ namespace Firma.CustomControls
 
 
 
-        public InputScope InputScope
+        public string InputScope
         {
-            get { return (InputScope)GetValue(InputScopeProperty); }
-            set { SetValue(InputScopeProperty, value); }
+            get { return (string)GetValue(InputScopeProperty); }
+            set
+            {
+                SetValue(InputScopeProperty, value);
+            }
+        }
+
+        private void SetInputScope(string inputScopeName)
+        {
+            switch (inputScopeName)
+            {
+                case "Number":
+                    ValueTextBox.InputScope = new InputScope()
+                    {
+                        Names = { new InputScopeName(InputScopeNameValue.Number) }
+                    };
+                    break;
+                case "Text":
+                    ValueTextBox.InputScope = new InputScope()
+                    {
+                        Names = { new InputScopeName(InputScopeNameValue.Text) }
+                    };
+                    break;
+            }
         }
 
         // Using a DependencyProperty as the backing store for InputScope.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty InputScopeProperty =
-            DependencyProperty.Register(nameof(InputScope), typeof(InputScope), typeof(ValidationTextBox), new PropertyMetadata(null));
+            DependencyProperty.Register(nameof(InputScope), typeof(string), typeof(ValidationTextBox), new PropertyMetadata(null));
 
 
 
@@ -76,6 +105,12 @@ namespace Firma.CustomControls
         }
 
         private void ValueTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(ErrorMessage))
+                TextChangedAction?.Invoke(AttributeName);
+        }
+
+        private void ValueTextBox_FocusDisengaged(Control sender, FocusDisengagedEventArgs args)
         {
             TextChangedAction?.Invoke(AttributeName);
         }

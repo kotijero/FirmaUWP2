@@ -1,5 +1,5 @@
 ﻿<Page
-    x:Class="Firma.Views.DokumentDetails"
+    x:Class="Firma.Views.DokumentVirtualizationDetails"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Firma.Views"
@@ -8,7 +8,10 @@
     xmlns:converters="using:Firma.Converters"
     xmlns:custom="using:Firma.CustomControls"
     xmlns:viewmodel="using:ViewModel.DomainViewModels"
-    mc:Ignorable="d">
+    xmlns:model="using:Firma.Model"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    MinWidth="1280">
     <Page.Resources>
         <converters:OsobaToTrueConverter x:Key="OsobaToTrueConverter"/>
         <converters:TvrtkaToTrueConverter x:Key="TvrtkaToTrueConverter"/>
@@ -95,7 +98,8 @@
         </Style>
     </Page.Resources>
 
-    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <RelativePanel Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                   MinWidth="1280">
         <Button Name="BackButton"
                 Style="{StaticResource NavigationBackButtonNormalStyle}"
                 RelativePanel.AlignTopWithPanel="True"
@@ -114,24 +118,47 @@
         <custom:CrudControlsBar ViewModel="{x:Bind ViewModel.CrudControlsViewModel}"
                                 RelativePanel.AlignTopWithPanel="True"
                                 RelativePanel.AlignRightWithPanel="True"/>
-        <custom:FilteredListView Name="ItemListView" ViewModel="{x:Bind ViewModel.FilteredListViewModel, Converter={StaticResource ToListableModelConverter}}"
-                                 RelativePanel.Below="TitleTextBlock"
-                                 RelativePanel.AlignLeftWithPanel="True"
-                                 RelativePanel.AlignBottomWithPanel="True"/>
+        <ProgressRing Name="LoadingIndicator"
+                      RelativePanel.Below="TitleTextBlock"
+                      IsActive="{x:Bind ViewModel.Loading, Mode=OneWay}"
+                      HorizontalAlignment="Center"
+                      Height="50"
+                      Width="50"
+                      Margin="75,40"/>
+        <ListView Name="ItemsListView"
+                  RelativePanel.Below="TitleTextBlock"
+                  RelativePanel.AlignLeftWithPanel="True"
+                  RelativePanel.AlignBottomWithPanel="True"
+                  Margin="10"
+                  ShowsScrollingPlaceholders="True"
+                  SelectedIndex="{x:Bind ViewModel.CurrentPosition, Mode=TwoWay}"
+                  Width="300"
+                  MaxWidth="300"
+                  IsEnabled="{x:Bind ViewModel.NotInEditMode, Mode=OneWay}">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="model:Dokument">
+                    <StackPanel Orientation="Vertical">
+                        <TextBlock Text="{Binding Title, Mode=OneWay}"
+                                   Style="{StaticResource BodyTextBlockStyle}"/>
+                        <TextBlock Text="{Binding Subtitle, Mode=OneWay}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="Gray"/>
+                        <TextBlock Text="{Binding Subsubtitle, Mode=OneWay}"
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="Gray"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
         <RelativePanel Name="DetailsSP"
-                    RelativePanel.RightOf="ItemListView"
-                    RelativePanel.AlignTopWith="ItemListView"
-                    RelativePanel.AlignBottomWithPanel="True"
-                    Margin="10"
-                       x:Load="{x:Bind ViewModel.ShowDetails, Mode=OneWay}"
-                    >
-            <TextBlock Name="NewDocumentTitle"
-                Text="Novi dokument"
-                       Margin="5"
-                       Style="{StaticResource TitleTextBlockStyle}"
-                       Visibility="{x:Bind ViewModel.IsNewItem, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"/>
-            <Grid Name="DetailsGrid2"
-                  RelativePanel.Below="NewDocumentTitle"
+                       RelativePanel.RightOf="ItemsListView"
+                       RelativePanel.AlignTopWith="ItemsListView"
+                       RelativePanel.AlignBottomWithPanel="True"
+                       RelativePanel.AlignRightWithPanel="True"
+                       MinWidth="940"
+                       Margin="10"
+                       x:Load="{x:Bind ViewModel.ShowDetails, Mode=OneWay}">
+            <Grid Name="DetailsGrid"
                   Margin="24,8,8,8">
                 <Grid.RowDefinitions>
                     <RowDefinition/>
@@ -206,7 +233,6 @@
                                           TextChangedAction="{x:Bind ViewModel.ValidatePropertyAction('BrDokumenta')}"
                                           TotalElementWidth="300"
                                           IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
-                                          InputScope="Number"
                                           Grid.Row="1"
                                           Grid.Column="3"/>
                 <TextBlock Text="Partner"
@@ -258,12 +284,10 @@
                            Grid.Row="3"
                            Grid.Column="2"
                            Margin="6"/>
-                <custom:ValidationTextBox Text="{x:Bind ViewModel.CurrentItem.IznosDokumenta, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
-                                          ErrorMessage=""
-                                          TotalElementWidth="300"
-                                          Grid.Row="3"
-                                          Grid.Column="3"
-                                          IsEnabled="False"/>
+                <TextBox Text="{x:Bind ViewModel.CurrentItem.IznosDokumenta, Mode=TwoWay, Converter={StaticResource DecimalToStringConverter}}"
+                         Grid.Row="3"
+                         Grid.Column="3"
+                         IsEnabled="False"/>
             </Grid>
             <Button Name="AddNewStavkaButton"
                     Content="+ Dodaj Stavku"
@@ -272,7 +296,7 @@
                     Visibility="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource TrueToVisibleConverter}}"
                     RelativePanel.Above="StavkeListView"/>
             <ListView Name="StavkeListView"
-                      RelativePanel.Below="DetailsGrid2"
+                      RelativePanel.Below="DetailsGrid"
                       RelativePanel.AlignBottomWithPanel="True"
                       Margin="0,40,0,0"
                       SelectionMode="None"

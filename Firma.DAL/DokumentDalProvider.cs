@@ -1,4 +1,5 @@
 ﻿using Firma.DTO;
+using Firma.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -29,14 +30,15 @@ namespace Firma.DAL
                     BrDokumenta = (int)row[nameof(dokument.BrDokumenta)],
                     DatDokumenta = (DateTime)row[nameof(dokument.DatDokumenta)],
                     IdPartnera = (int)row[nameof(dokument.IdPartnera)],
-                    IdPrethDokumenta = (int)row[nameof(dokument.IdPartnera)],
+                    IdPrethDokumenta = (row[nameof(dokument.IdPrethDokumenta)] is DBNull) ? null : (int?)row[nameof(dokument.IdPrethDokumenta)],
                     PostoPorez = (decimal)row[nameof(dokument.PostoPorez)],
-                    IznosDokumenta = (decimal)row[nameof(dokument.PostoPorez)]
+                    IznosDokumenta = (decimal)row[nameof(dokument.IznosDokumenta)]
                 };
                 return dokument;
             }
         }
 
+        // TODO: Izmjeni u CheckForIdPrethDokumenta(int idPrethDokumenta)
         public List<Dokument> FetchDokumentsWithIdPrethDokumenta(int idPrethDokumenta)
         {
             string query = $"SELECT * FROM Dokument WHERE IdPrethDokumenta = {idPrethDokumenta}";
@@ -96,6 +98,18 @@ namespace Firma.DAL
                 }
                 return dokumentList;
             }
+        }
+
+        public List<int> FetchAllIds()
+        {
+            string query = "SELECT IdDokumenta FROM Dokument ORDER BY BrDokumenta";
+            var result = QueryExecutor.ExecuteQuery(query);
+            List<int> idList = new List<int>();
+            foreach(DataRow row in result.Rows)
+            {
+                idList.Add((int)row["IdDokumenta"]);
+            }
+            return idList;
         }
 
         public Dokument AddItem(Dokument item)

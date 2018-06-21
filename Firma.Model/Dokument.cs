@@ -21,7 +21,7 @@ namespace Firma.Model
             prethodniDokumentLookup = Defaults.DokumentLookup;
         }
 
-        public Dokument(DTO.Dokument dokument, List<Stavka> stavkaList)
+        public Dokument(DTO.Dokument dokument)
         {
             idDokumenta = dokument.IdDokumenta;
             vrDokumenta = dokument.VrDokumenta;
@@ -31,7 +31,11 @@ namespace Firma.Model
             idPrethDokumenta = dokument.IdPrethDokumenta;
             postoPorez = dokument.PostoPorez;
             iznosDokumenta = dokument.IznosDokumenta;
-            
+        }
+
+        public Dokument(DTO.Dokument dokument, List<Stavka> stavkaList)
+            :this(dokument)
+        {
             foreach (var stavka in stavkaList)
             {
                 Stavke.Add(stavka);
@@ -134,7 +138,7 @@ namespace Firma.Model
             }
         }
 
-        public virtual ObservableCollection<Stavka> Stavke { get; set; } = new ObservableCollection<Stavka>();
+        public virtual List<Stavka> Stavke { get; set; } = new List<Stavka>();
 
         public LookupModel PartnerLookup
         {

@@ -32,21 +32,18 @@ namespace Firma.Model
             mjestoPartneraLookup = Defaults.MjestoLookup;
         }
 
-        public Partner(DTO.Partner partner, List<LookupModel> mjestoLookupList)
+        public Partner(DTO.Partner partner)
         {
-
             idPartnera = partner.IdPartnera;
             tipPartnera = partner.TipPartnera;
             oib = partner.OIB;
 
             idMjestaPartnera = partner.IdMjestaPartnera;
             adrPartnera = partner.AdrPartnera;
-            mjestoPartneraLookup = mjestoLookupList.FirstOrDefault(t => t.Key.Equals(idMjestaPartnera));
 
             idMjestaIsporuke = partner.IdMjestaIsporuke;
             adrIsporuke = partner.AdrIsporuke;
-            mjestoIsporukeLookup = mjestoLookupList.FirstOrDefault(t => t.Key.Equals(idMjestaIsporuke));
-            
+
             if (tipPartnera.Equals(Constants.OsobaTip))
             {
                 imeOsobe = ((DTO.Osoba)partner).ImeOsobe;
@@ -63,34 +60,18 @@ namespace Firma.Model
             }
         }
 
-        public Partner(DTO.Partner partner, LookupModel mjestoPartneraLookup, LookupModel mjestoIsporukeLookup)
+        public Partner(DTO.Partner partner, List<LookupModel> mjestoLookupList)
+            : this(partner)
         {
-            idPartnera = partner.IdPartnera;
-            tipPartnera = partner.TipPartnera;
-            oib = partner.OIB;
+            mjestoPartneraLookup = mjestoLookupList.FirstOrDefault(t => t.Key.Equals(idMjestaPartnera));
+            mjestoIsporukeLookup = mjestoLookupList.FirstOrDefault(t => t.Key.Equals(idMjestaIsporuke));
+        }
 
-            idMjestaPartnera = partner.IdMjestaPartnera;
-            adrPartnera = partner.AdrPartnera;
+        public Partner(DTO.Partner partner, LookupModel mjestoPartneraLookup, LookupModel mjestoIsporukeLookup)
+            : this(partner)
+        {
             this.mjestoPartneraLookup = mjestoPartneraLookup;
-
-            idMjestaIsporuke = partner.IdMjestaIsporuke;
-            adrIsporuke = partner.AdrIsporuke;
             this.mjestoIsporukeLookup = mjestoIsporukeLookup;
-
-            if (tipPartnera.Equals(Constants.OsobaTip))
-            {
-                imeOsobe = ((DTO.Osoba)partner).ImeOsobe;
-                prezimeOsobe = ((DTO.Osoba)partner).PrezimeOsobe;
-                nazivTvrtke = string.Empty;
-                matBrTvrtke = string.Empty;
-            }
-            else
-            {
-                imeOsobe = string.Empty;
-                prezimeOsobe = string.Empty;
-                nazivTvrtke = ((DTO.Tvrtka)partner).NazivTvrtke;
-                matBrTvrtke = ((DTO.Tvrtka)partner).MatBrTvrtke;
-            }
         }
 
         #endregion

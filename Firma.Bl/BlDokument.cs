@@ -14,10 +14,7 @@ namespace Firma.Bl
     {
         DokumentDalProvider dokumentDalProvider = new DokumentDalProvider();
 
-        public ResultWrapper<Dokument> Fetch(int Id)
-        {
-            throw new NotImplementedException();
-        }
+        
 
         public ResultWrapper<List<Dokument>> FetchAll()
         {
@@ -62,6 +59,44 @@ namespace Firma.Bl
             return new ResultWrapper<List<Dokument>>(dokumentList, errorMessage);
         }
 
+        public ResultWrapper<Dokument> Fetch(int Id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ResultWrapper<Dokument> FetchWithoutStavke(int id, bool fillLookups)
+        {
+            Dokument dokument = null;
+            string errorMessage = string.Empty;
+            try
+            {
+                var dokumentDTO = dokumentDalProvider.Fetch(id);
+                dokument = new Dokument(dokumentDTO);
+
+                PartnerDalProvider partnerDal = new PartnerDalProvider();
+                dokument.PartnerLookup = partnerDal.FetchSingleLookup(dokument.IdPartnera);
+                if (dokument.IdPrethDokumenta.HasValue && dokument.IdPrethDokumenta.Value >= 0)
+                {
+                    dokument.PrethodniDokumentLookup = FetchSingleLookup(dokument.IdPrethDokumenta.Value).Value;
+                }
+                else
+                {
+                    dokument.PrethodniDokumentLookup = Defaults.DokumentLookup;
+                }
+                
+            }
+            catch (Exception exc)
+            {
+                errorMessage = HandleException(exc);
+            }
+            return new ResultWrapper<Dokument>(dokument, errorMessage);
+        }
+
+        public List<int> FetchAllIds()
+        {
+            return dokumentDalProvider.FetchAllIds();
+        }
+
         public ResultWrapper<Dokument> AddItem(Dokument item)
         {
             Dokument dokument = null;
@@ -88,8 +123,7 @@ namespace Firma.Bl
 
         public ResultWrapper<Dokument> UpdateItem(Dokument newItem, Dokument oldItem)
         {
-            Dokument dokument = null;
-            string errorMessage = string.Empty;
+            ResultWrapper<Dokument> result = new ResultWrapper<Dokument>();
             try
             {
                 dokumentDalProvider.UpdateItem(newItem.ToDTO());
@@ -119,23 +153,22 @@ namespace Firma.Bl
                         stavkaDal.DeleteItem(oldStavka.ToDTO());
                     }
                 }
-                dokument = newItem;
+                result.Value = newItem;
             }
             catch (Exception exc)
             {
-                errorMessage = HandleException(exc);
+                result.ErrorMessage = HandleException(exc);
             }
-            return new ResultWrapper<Dokument>(newItem, errorMessage);
+            return result;
         }
 
         public ResultWrapper<Dokument> DeleteItem(Dokument item)
         {
-            Dokument dokument = null;
-            string errorMessage = string.Empty;
+            ResultWrapper<Dokument> result = new ResultWrapper<Dokument>();
             try
             {
                 if (dokumentDalProvider.FetchDokumentsWithIdPrethDokumenta(item.IdDokumenta) != null)
-                    errorMessage = "Nije moguće obrisati jer postoje dokumenti koji se referenciraju na ovaj.";
+                    result.ErrorMessage = "Nije moguće obrisati jer postoje dokumenti koji se referenciraju na ovaj.";
                 else
                 {
                     // stavke:
@@ -145,13 +178,53 @@ namespace Firma.Bl
                         stavkaDal.DeleteItem(stavka.ToDTO());
                     }
                     dokumentDalProvider.DeleteItem(item.ToDTO());
+                    result.Value = item;
                 }
             }
             catch (Exception exc)
             {
-                errorMessage = HandleException(exc);
+                result.ErrorMessage = HandleException(exc);
             }
-            return new ResultWrapper<Dokument>(dokument, errorMessage);
+
+            return result;
+        }
+
+        public ResultWrapper<LookupModel> FetchSingleLookup(int id)
+        {
+            ResultWrapper<LookupModel> result = new ResultWrapper<LookupModel>();
+            try
+            {
+                Dokument dokument = new Dokument(dokumentDalProvider.Fetch(id));
+                PartnerDalProvider partnerDal = new PartnerDalProvider();
+                dokument.PartnerLookup = new LookupModel(dokument.IdPartnera, (new Partner(partnerDal.Fetch(dokument.IdPartnera)).Naziv));
+                result.Value = new LookupModel(id, dokument.LookupData);
+            }
+            catch (Exception exc)
+            {
+                result.ErrorMessage = HandleException(exc);
+            }
+            return result;
+        }
+
+        public ResultWrapper<List<Stavka>> FetchStavkeFor(int idDokumenta, List<Artikl> artiklList)
+        {
+            ResultWrapper<List<Stavka>> result = new ResultWrapper<List<Stavka>>();
+            try
+            {
+                StavkaDalProvider stavkaDal = new StavkaDalProvider();
+                List<Stavka> stavkeList = new List<Stavka>();
+                var stavkeDTOList = stavkaDal.FetchForDokumentId(idDokumenta);
+                foreach(var stavka in stavkeDTOList)
+                {
+                    stavkeList.Add(new Stavka(stavka, artiklList.FirstOrDefault(t => t.SifArtikla == stavka.SifArtikla)));
+                }
+                result.Value = stavkeList;
+            }
+            catch (Exception exc)
+            {
+                result.ErrorMessage = HandleException(exc);
+            }
+            return result;
         }
 
         #region Validation

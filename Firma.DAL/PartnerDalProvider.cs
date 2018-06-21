@@ -14,7 +14,7 @@ namespace Firma.DAL
     {
         public Partner Fetch(int Id)
         {
-            string query = "SELECT * FROM Partner WHERE Id = @Id";
+            string query = "SELECT * FROM Partner WHERE IdPartnera = @Id";
             DataTable result = QueryExecutor.ExecuteQuery(query, new List<SqlParameter> { new SqlParameter("@Id", Id) });
             if (result.Rows.Count < 1)
             {
@@ -176,6 +176,24 @@ namespace Firma.DAL
                 }
             }
             return res;
+        }
+
+        public LookupModel FetchSingleLookup(int idPartnera)
+        {
+            string query = @"SELECT IdPartnera, ImeOsobe, PRezimeOsobe, NazivTvrtke, TipPartnera
+                               FROM Partner LEFT JOIN Osoba ON Partner.IdPartnera = Osoba.IdOsobe
+                                            LEFT JOIN Tvrtka ON Partner.IdPartnera = Tvrtka.IdTvrtke
+                               WHERE IdPartnera = @IdPartnera";
+            DataTable result = QueryExecutor.ExecuteQuery(query, new List<SqlParameter> { new SqlParameter("@IdPartnera", idPartnera) });
+            DataRow row = result?.Rows[0];
+            if (row[nameof(Partner.TipPartnera)].Equals(Constants.OsobaTip))
+            {
+                return new LookupModel((int)row[nameof(Partner.IdPartnera)], (string)row[nameof(Osoba.ImeOsobe)] + " " + (string)row[nameof(Osoba.PrezimeOsobe)]);
+            }
+            else
+            {
+                return new LookupModel((int)row[nameof(Partner.IdPartnera)], (string)row[nameof(Tvrtka.NazivTvrtke)]);
+            }
         }
 
         public Partner AddItem(Partner item)

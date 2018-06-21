@@ -107,6 +107,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="DataVirtualization\ItemCacheManager.cs" />
+    <Compile Include="DataVirtualization\ItemIndexRangeExtensions.cs" />
+    <Compile Include="DataVirtualization\ItemIndexRangeList.cs" />
     <Compile Include="Defaults.cs" />
     <Compile Include="ListableModel.cs" />
     <Compile Include="LookupModel.cs" />

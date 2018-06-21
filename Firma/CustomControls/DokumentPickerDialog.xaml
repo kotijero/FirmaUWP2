@@ -16,17 +16,27 @@
     MinWidth="686">
 
     <RelativePanel>
+        <ProgressRing IsActive="{x:Bind ViewModel.Loading, Mode=OneWay}"
+                      Margin="10"
+                      Width="50"
+                      Height="50"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      RelativePanel.AlignHorizontalCenterWithPanel="True"
+                      RelativePanel.AlignVerticalCenterWithPanel="True"/>
         <AutoSuggestBox Name="QueryAS"
                         PlaceholderText="Pretraga"
                         QueryIcon="Find"
                         Text="{x:Bind ViewModel.Filter, Mode=TwoWay}"
                         RelativePanel.AlignTopWithPanel="True"
                         RelativePanel.AlignLeftWithPanel="True"
-                        RelativePanel.AlignRightWithPanel="True"/>
+                        RelativePanel.AlignRightWithPanel="True"
+                        Visibility="{x:Bind ViewModel.ShowDetails, Mode=OneWay}"/>
         <StackPanel Name="HeaderStackPanel"
                     Orientation="Horizontal"
                     RelativePanel.Below="QueryAS"
-                    Margin="6,0,6,0">
+                    Margin="6,0,6,0"
+                    Visibility="{x:Bind ViewModel.ShowDetails, Mode=OneWay}">
             <TextBlock Text="Br"
                        Margin="6"
                        Width="40"/>
@@ -58,7 +68,8 @@
                   RelativePanel.AlignLeftWithPanel="True"
                   RelativePanel.AlignRightWithPanel="True"
                   RelativePanel.Above="ErrorTextBlock"
-                  Height="300">
+                  Height="300"
+                  x:Load="{x:Bind ViewModel.ShowDetails, Mode=OneWay}">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="model:Dokument">
                     <StackPanel Orientation="Horizontal">

@@ -110,9 +110,12 @@
     <Compile Include="CustomControlViewModels\CrudControlsViewModel.cs" />
     <Compile Include="CustomControlViewModels\DokumentPickerViewModel.cs" />
     <Compile Include="CustomControlViewModels\FilteredListViewModel.cs" />
+    <Compile Include="CustomDataSources\DokumentDataSource.cs" />
     <Compile Include="DetailsViewModelBase.cs" />
+    <Compile Include="DetailsVirtualizationViewModelBase.cs" />
     <Compile Include="DomainViewModels\ArtiklViewModel.cs" />
     <Compile Include="DomainViewModels\DokumentViewModel.cs" />
+    <Compile Include="DomainViewModels\DokumentVirtualizationViewModel.cs" />
     <Compile Include="DomainViewModels\DrzavaViewModel.cs" />
     <Compile Include="DomainViewModels\KorisnikViewModel.cs" />
     <Compile Include="CustomControlViewModels\SignInViewModel.cs" />

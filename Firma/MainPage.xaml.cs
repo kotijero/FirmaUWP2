@@ -75,11 +75,6 @@ namespace Firma
             this.Frame.Navigate(typeof(Views.SettingsPage), ViewModel.Korisnik);
         }
 
-        private void DrzavaButton_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
-
         private async void Login()
         {
             CustomControls.SignInContentDialog signInContentDialog = new CustomControls.SignInContentDialog();
@@ -109,6 +104,10 @@ namespace Firma
         {
             this.Frame.Navigate(typeof(Views.KorisniciList), ViewModel.Korisnik);
         }
-        
+
+        private void DokumentVirtualizationButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Views.DokumentVirtualizationDetails));
+        }
     }
 }

@@ -81,12 +81,28 @@ namespace Firma.Model
         }
         public decimal JedCijArtikla
         {
-            get { return jedCijArtikla; }
+            get
+            {
+                if (!(jedCijArtikla > 0))
+                {
+                    if (artikl == null)
+                    {
+                        return 0.0M;
+                        
+                    }
+                    else
+                    {
+                        jedCijArtikla = artikl.CijArtikla;
+                    }
+                }
+                return jedCijArtikla;
+            }
             set
             {
                 jedCijArtikla = value;
             }
         }
+
         public decimal PostoRabat
         {
             get { return postoRabat; }

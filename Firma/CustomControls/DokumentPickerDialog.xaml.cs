@@ -31,7 +31,7 @@ namespace Firma.CustomControls
 
         private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            var response = ViewModel.CanSelect();
+            var response = ViewModel.VerifySelection();
             if (!string.IsNullOrEmpty(response))
             {
                 ErrorTextBlock.Text = response;

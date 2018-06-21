@@ -65,6 +65,7 @@ namespace Firma.Bl.ValidationModels
                 default:
                     return;
             }
+            CheckDirty();
             OnPropertyChanged(propertyName);
         }
 

@@ -177,7 +177,6 @@ namespace ViewModel.DomainViewModels
                     return "Unos podataka nije korektan. Potrebno ispraviti prije spremanja.";
                 }
             }
-            InEditMode = false;
             if (IsNewItem)
             {
                 var response = BlPartner.AddItem(newItem);
@@ -196,6 +195,7 @@ namespace ViewModel.DomainViewModels
             {
                 BlPartner.UpdateItem(CurrentItem);
             }
+            InEditMode = false;
             return string.Empty;
         }
 
@@ -209,8 +209,8 @@ namespace ViewModel.DomainViewModels
             }
             else
             {
-                // Ako se ucitavaju podaci onda vjerojatno lista mjesta nije
-                // popunjena, pa se dodaju defaultne vrijedosti.
+                // Ako se ucitavaju podaci onda vjerojatno lista mjesta 
+                // nije popunjena, pa se dodaju defaultne vrijedosti.
                 newItem.MjestoIsporukeLookup = Defaults.MjestoLookup;
                 newItem.MjestoSjedistaLookup = Defaults.MjestoLookup;
             }

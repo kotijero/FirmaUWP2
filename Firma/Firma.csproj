@@ -140,6 +140,9 @@
     <Compile Include="Views\DokumentDetails.xaml.cs">
       <DependentUpon>DokumentDetails.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\DokumentVirtualizationDetails.xaml.cs">
+      <DependentUpon>DokumentVirtualizationDetails.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\KorisniciList.xaml.cs">
       <DependentUpon>KorisniciList.xaml</DependentUpon>
     </Compile>
@@ -232,6 +235,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\DokumentDetails.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DokumentVirtualizationDetails.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

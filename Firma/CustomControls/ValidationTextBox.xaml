@@ -21,7 +21,7 @@
                  PlaceholderText="{x:Bind PlaceHolderText}"
                  HorizontalAlignment="Left"
                  TextChanged="ValueTextBox_TextChanged"
-                 InputScope="{x:Bind InputScope, Mode=OneWay}"/>
+                 FocusDisengaged="ValueTextBox_FocusDisengaged"/>
         <TextBlock x:Name="ErrorMessageTextBlock"
                    Text="{x:Bind ErrorMessage, Mode=OneWay}"
                    Foreground="Red"

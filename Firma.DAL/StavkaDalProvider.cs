@@ -84,7 +84,7 @@ namespace Firma.DAL
                         SifArtikla = (int)row[nameof(Stavka.SifArtikla)],
                         KolArtikla = (decimal)row[nameof(Stavka.KolArtikla)],
                         JedCijArtikla = (decimal)row[nameof(Stavka.JedCijArtikla)],
-                        PostoRabat = (decimal)row[nameof(Stavka)]
+                        PostoRabat = (decimal)row[nameof(Stavka.PostoRabat)]
                     });
                 }
                 return stavkaList;

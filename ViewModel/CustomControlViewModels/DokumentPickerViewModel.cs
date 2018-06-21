@@ -1,4 +1,5 @@
-﻿using Firma.Helpers;
+﻿using Firma.Bl;
+using Firma.Helpers;
 using Firma.Model;
 using System;
 using System.Collections.Generic;
@@ -11,13 +12,39 @@ namespace ViewModel.CustomControlViewModels
 {
     public class DokumentPickerViewModel : ObservableModel
     {
-        public DokumentPickerViewModel(List<Dokument> itemsList)
+        public DokumentPickerViewModel(List<Dokument> itemsList, BlDokument blDokument)
         {
             this.itemsList = itemsList;
             SelectionMade = false;
             currentPosition = -1;
             filter = string.Empty;
-            ApplyFilter();
+            
+            if (itemsList == null)
+            {
+                loading = true;
+                Load(blDokument);
+            }
+            else
+            {
+                loading = false;
+                ApplyFilter();
+            }
+        }
+
+        private async void Load(BlDokument blDokument)
+        {
+            await Task.Run(() =>
+            {
+                itemsList = blDokument.FetchAll().Value;
+                BlPartner blPartner = new BlPartner();
+                var partnerLookups = blPartner.FetchLookup();
+                foreach(var dokument in itemsList)
+                {
+                    dokument.PartnerLookup = partnerLookups.Value.First(t => t.Key == dokument.IdPartnera);
+                }
+            });
+            Loading = false;
+            Filter = string.Empty;
         }
 
         private List<Dokument> itemsList;
@@ -37,7 +64,7 @@ namespace ViewModel.CustomControlViewModels
 
         public bool SelectionMade { get; set; }
 
-        public string CanSelect()
+        public string VerifySelection()
         {
             if (currentPosition < 0) return "Niste odabrali dokument!";
             SelectionMade = true;
@@ -56,9 +83,26 @@ namespace ViewModel.CustomControlViewModels
             }
         }
 
-        private void ApplyFilter()
+        private bool loading;
+        public bool Loading
         {
-            Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
+            get { return loading; }
+            set
+            {
+                loading = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(ShowDetails));
+            }
+        }
+
+        public bool ShowDetails
+        {
+            get { return !loading; }
+        }
+
+        private async void ApplyFilter()
+        {
+            await Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal,
                 () =>
                 {
                     ItemsList.Clear();

@@ -52,8 +52,8 @@ namespace Firma.Bl.ValidationModels
         public override bool CheckDirty()
         {
             if (!string.IsNullOrEmpty(kolArtikla)
-                || string.IsNullOrEmpty(jedCijArtikla)
-                || string.IsNullOrEmpty(postoRabat))
+                || !string.IsNullOrEmpty(jedCijArtikla)
+                || !string.IsNullOrEmpty(postoRabat))
                 IsDirty = true;
             else
                 IsDirty = false;
