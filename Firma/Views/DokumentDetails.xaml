@@ -188,7 +188,7 @@
                             RelativePanel.AlignTopWithPanel="True" 
                             HorizontalAlignment="Center" 
                             Margin="0,0,0,0" 
-                            VerticalAlignment="Center" 
+                            VerticalAlignment="Top" 
                             Height="33"
                             MinWidth="250"
                             Width="{x:Bind ViewModel.InEditMode, Mode=OneWay, Converter={StaticResource EditModeToWidthConverter}}">
@@ -224,7 +224,8 @@
                                     QuerySubmitted="PartnerAutoSuggestBox_QuerySubmitted"
                                     DisplayMemberPath="Value"
                                     TextMemberPath="Value"
-                                    IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                                    IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                    GotFocus="PartnerAutoSuggestBox_GotFocus"/>
                     <TextBlock Name="PartnerErrorTextBlock"
                                Text="{x:Bind ViewModel.Errors.IdPartnera, Mode=OneWay}"
                                Visibility="{x:Bind ViewModel.Errors.IdPartnera, Mode=OneWay, Converter={StaticResource StringContentToVisibleConverter}}"

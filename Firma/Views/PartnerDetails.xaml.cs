@@ -146,5 +146,10 @@ namespace Firma.Views
                 ViewModel.SubmitMjPartnera((LookupModel)args.ChosenSuggestion);
             }
         }
+
+        private void AutoSuggestBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            (e.OriginalSource as TextBox).SelectAll();
+        }
     }
 }

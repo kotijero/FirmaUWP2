@@ -24,7 +24,9 @@ namespace Firma.CustomControls
         public FilteredListView()
         {
             this.InitializeComponent();
+            
         }
+        
 
 
         public FilteredListViewModel ViewModel

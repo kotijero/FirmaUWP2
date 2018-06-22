@@ -21,12 +21,14 @@
                  PlaceholderText="{x:Bind PlaceHolderText}"
                  HorizontalAlignment="Left"
                  TextChanged="ValueTextBox_TextChanged"
-                 FocusDisengaged="ValueTextBox_FocusDisengaged"/>
+                 FocusDisengaged="ValueTextBox_FocusDisengaged"
+                 LostFocus="ValueTextBox_LostFocus"/>
         <TextBlock x:Name="ErrorMessageTextBlock"
                    Text="{x:Bind ErrorMessage, Mode=OneWay}"
                    Foreground="Red"
                    Margin="6"
                    HorizontalAlignment="Left"
+                   TextWrapping="WrapWholeWords"
                    Visibility="{x:Bind ErrorMessage, Mode=OneWay, Converter={StaticResource StringContentToVisibleConverter}}"/>
     </StackPanel>
 </UserControl>

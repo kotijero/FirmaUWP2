@@ -22,6 +22,15 @@ namespace Firma.Bl.ValidationModels
             cijArtikla = string.Empty;
             zastUsluga = string.Empty;
             tekstArtikla = string.Empty;
+            if (notify)
+            {
+                OnPropertyChanged(nameof(SifArtikla));
+                OnPropertyChanged(nameof(NazArtikla));
+                OnPropertyChanged(nameof(JedMjere));
+                OnPropertyChanged(nameof(CijArtikla));
+                OnPropertyChanged(nameof(ZastUsluga));
+                OnPropertyChanged(nameof(TekstArtikla));
+            }
         }
 
         public void ClearProperty(string propertyName)

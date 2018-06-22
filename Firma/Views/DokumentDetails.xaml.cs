@@ -162,5 +162,10 @@ namespace Firma.Views
                 ViewModel.RemoveStavka(stavkaViewModel);
             }
         }
+
+        private void PartnerAutoSuggestBox_GotFocus(object sender, RoutedEventArgs e)
+        {
+            (e.OriginalSource as TextBox).SelectAll();
+        }
     }
 }

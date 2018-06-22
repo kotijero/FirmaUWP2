@@ -331,7 +331,8 @@
                                 TextMemberPath="Value"
                                 Grid.Row="1"
                                 Grid.Column="1"
-                                IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                                IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                GotFocus="AutoSuggestBox_GotFocus"/>
             </Grid>
             <TextBlock Text="Adresa isporuke"
                        Margin="2"
@@ -400,7 +401,8 @@
                                 TextMemberPath="Value"
                                 Grid.Row="1"
                                 Grid.Column="1"
-                                IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"/>
+                                IsEnabled="{x:Bind ViewModel.InEditMode, Mode=OneWay}"
+                                GotFocus="AutoSuggestBox_GotFocus"/>
             </Grid>
         </StackPanel>
     </RelativePanel>

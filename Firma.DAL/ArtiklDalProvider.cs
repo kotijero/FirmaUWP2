@@ -116,12 +116,23 @@ namespace Firma.DAL
             sqlParameters.Add(new SqlParameter("@JedMjere", item.JedMjere));
             sqlParameters.Add(new SqlParameter("@CijArtikla", item.CijArtikla));
             sqlParameters.Add(new SqlParameter("@ZastUsluga", item.ZastUsluga));
-            sqlParameters.Add(new SqlParameter("@SlikaArtikla", SqlDbType.VarBinary)
+            if (item.SlikaArtikla != null)
             {
-                Direction = ParameterDirection.Input,
-                Size = item.SlikaArtikla.Length,
-                Value = item.SlikaArtikla
-            });
+                sqlParameters.Add(new SqlParameter("@SlikaArtikla", SqlDbType.VarBinary)
+                {
+                    Direction = ParameterDirection.Input,
+                    Size = item.SlikaArtikla.Length,
+                    Value = item.SlikaArtikla
+                });
+            }
+            else
+            {
+                sqlParameters.Add(new SqlParameter("@SlikaArtikla", SqlDbType.VarBinary)
+                {
+                    Direction = ParameterDirection.Input,
+                    Value = DBNull.Value
+                });
+            }
             sqlParameters.Add(new SqlParameter("@TekstArtikla", item.TekstArtikla));
             sqlParameters.Add(new SqlParameter("@SifArtikla", item.SifArtikla));
 

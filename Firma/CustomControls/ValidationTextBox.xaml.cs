@@ -101,6 +101,7 @@ namespace Firma.CustomControls
             {
                 totalElementWidth = value;
                 ValueTextBox.Width = totalElementWidth;
+                ErrorMessageTextBlock.MaxWidth = TotalElementWidth;
             }
         }
 
@@ -111,6 +112,11 @@ namespace Firma.CustomControls
         }
 
         private void ValueTextBox_FocusDisengaged(Control sender, FocusDisengagedEventArgs args)
+        {
+            TextChangedAction?.Invoke(AttributeName);
+        }
+
+        private void ValueTextBox_LostFocus(object sender, RoutedEventArgs e)
         {
             TextChangedAction?.Invoke(AttributeName);
         }
